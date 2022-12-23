@@ -1,17 +1,6 @@
 from random import shuffle
 
 
-class HumanPlayer(Player):
-    def calls(self):
-        pass
-
-    def raises(self, amount):
-        pass
-
-    def fold(self):
-        pass
-
-
 class Player:
     def __init__(self, name):
         self._name = name
@@ -25,8 +14,8 @@ class Player:
     def chips(self):
         return self._chips
 
-    def set_cards(self, cards):
-        self._cards = cards
+    def add_cards(self, cards):
+        self._cards += cards
 
     @property
     def cards(self):
@@ -34,7 +23,24 @@ class Player:
 
 
 class ComputerPlayer(Player):
-    def make_smart_decision():
+    # def make_smart_decision(self, phase):
+    #     cards = []
+    #     for card in self.card:
+    #         cards.append((card.suit, card.rank))
+    #     cards_sorted_by_rank = sorted(cards, key=cards[1])
+    #     cards_sorted_by_suit = sorted(card)
+
+
+
+
+class HumanPlayer(Player):
+    def calls(self):
+        pass
+
+    def raises(self, amount):
+        pass
+
+    def fold(self):
         pass
 
 
@@ -66,7 +72,7 @@ class Table:
 
     def first_phase(self):
         for player in self._players:
-            player.set_cards([self._deck.pop(), self._deck.pop()])
+            player.add_cards([self._deck.pop(), self._deck.pop()])
 
     def flop(self):
         self._cards_on_table = [
@@ -74,12 +80,20 @@ class Table:
             self._deck.pop(),
             self._deck.pop()
         ]
+        for player in self._players:
+            player.add_card(self._cards_on_table)
 
     def river(self):
-        self._cards_on_table.append(self._deck.pop())
+        river_card = self._deck.pop()
+        self._cards_on_table.append(river_card)
+        for player in self._players:
+            player.add_card([river_card])
 
     def turn(self):
-        self._cards_on_table.append(self._deck.pop())
+        turn_card = self._deck.pop()
+        self._cards_on_table.append(turn_card)
+        for player in self._players:
+            player.add_card([turn_card])
 
 
 class Game:
@@ -96,8 +110,7 @@ class Game:
 def create_deck():
     deck = []
     suits = ['c', 'd', 'h', 's']
-    ranks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'j', 'g', 'k', 'a']
     for suit in suits:
-        for rank in ranks:
+        for rank in range(1, 14):
             deck.append(Card(suit, rank))
     return deck
