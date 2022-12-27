@@ -1,4 +1,4 @@
-from random import shuffle
+from random import shuffle, randint
 
 
 class Player:
@@ -28,13 +28,17 @@ class Player:
         return self._cards
 
     def call(self, min_bet):
-        pass
+        self.chips -= min_bet
+        return (2, min_bet)
 
     def raisee(self, min_bet):
-        pass
+        self.chips -= min_bet
+        to_rand = self.chips // 50
+        bet = randint(1, to_rand) * 50
+        return (3, bet)
 
     def fold(self):
-        pass
+        return (1, 0)
 
     def play(self):
         pass
@@ -120,11 +124,11 @@ class Table:
             for player in self._players:
                 self._calls[player.id] = False
             for i in range(start, start, 0):
+                to_bet = max_bet - self._bets[i]
                 if isinstance(self._players[i], ComputerPlayer):
-                    to_bet = max_bet - self._bets[i]
                     data = self._players[i].make_smart_decision(1, to_bet)
                 else:
-                    data = self._players[i].play()
+                    data = self._players[i].play(to_bet)
                 if data[0] == 1:
                     self._calls[i] = True
                     self._players.pop(self._players[i])
