@@ -30,7 +30,7 @@ class Player:
         self.chips -= min_bet
         to_rand = self.chips // 50
         bet = randint(1, to_rand) * 50
-        return (3, bet)
+        return (3, bet+min_bet)
 
     def fold(self):
         return (1, 0)
@@ -45,36 +45,37 @@ class ComputerPlayer(Player):
     def name(self):
         return self._name
 
-    def make_smart_decision(self, phase, min_bet):
+    def make_decision(self, phase, min_bet):
         points = score(self.cards)
         if phase == 1:
             if min_bet > self.chips / 10 and points > 11:
-                self.call(min_bet)
+                ans = self.call(min_bet)
             elif min_bet < self.chips / 10 and points > 11:
-                self.raisee(min_bet)
+                ans = self.raisee(min_bet)
             else:
-                self.fold()
+                ans = self.fold()
         elif phase == 2:
             if min_bet > self.chips / 7 and points > 100:
-                self.call(min_bet)
+                ans = self.call(min_bet)
             elif min_bet < self.chips / 7 and points > 100:
-                self.raisee(min_bet)
+                ans = self.raisee(min_bet)
             else:
-                self.fold()
+                ans = self.fold()
         elif phase == 3:
             if min_bet > self.chips / 5 and points > 130:
-                self.call(min_bet)
+                ans = self.call(min_bet)
             elif min_bet < self.chips / 5 and points > 130:
-                self.raisee(min_bet)
+                ans = self.raisee(min_bet)
             else:
-                self.fold()
+                ans = self.fold()
         elif phase == 4:
             if min_bet < self.chips and points > 130:
-                self.call(min_bet)
-            elif min_bet < self.chips and points > 130:
-                self.raisee(min_bet)
+                ans = self.call(min_bet)
+            elif min_bet <= self.chips and points > 1000:
+                ans = self.raisee(min_bet)
             else:
-                self.fold()
+                ans = self.fold()
+        return ans
 
 
 class HumanPlayer(Player):
@@ -87,8 +88,8 @@ class HumanPlayer(Player):
         return self._name
 
     def print_cards(self):
-        for card in self.cards:
-            print(card)
+        print(self.cards[0])
+        print(self._cards[1])
 
 
 class Card:
@@ -144,7 +145,7 @@ class Table:
         self._big_blind = players[(dealer+2) % len(players)]
         self._small_blind = players[(dealer+1) % len(players)]
 
-    def bidding(self):
+    def bidding(self, phase):
         while False in self._calls:
             if len(self._players) > 1:
                 print(f'{self._players[0].name} won {self._pot}!!!')
@@ -155,7 +156,7 @@ class Table:
             for i in range(start, start, 0):
                 to_bet = self._max_bet - self._bets[i]
                 if self._players[i].id != 0:
-                    data = self._players[i].make_smart_decision(1, to_bet)
+                    data = self._players[i].make_decision(phase, to_bet)
                 else:
                     data = self._players[i].play(to_bet)
                 if data[0] == 1:
@@ -191,7 +192,7 @@ class Table:
         self._players[self._big_blind].call(100)
         self._max_bet = 100
         self._pot = 150
-        self.bidding()
+        self.bidding(1)
         print('End of bidding phase')
 
     def flop(self):
@@ -208,20 +209,34 @@ class Table:
             print(card)
         for player in self._players:
             player.add_card(self._cards_on_table)
-        self.bidding()
+        self.bidding(2)
         print('End of flop phase')
 
     def river(self):
+        print('River')
+        print('Your cards')
+        self._players[0].print_cards()
         river_card = self._deck.pop()
         self._cards_on_table.append(river_card)
+        print("Cards on the table:")
+        for card in self._cards_on_table:
+            print(card)
         for player in self._players:
             player.add_card([river_card])
+        self.bidding(3)
 
     def turn(self):
+        print('Turn')
+        print('Your cards')
+        self._players[0].print_cards()
         turn_card = self._deck.pop()
         self._cards_on_table.append(turn_card)
+        print("Cards on the table:")
+        for card in self._cards_on_table:
+            print(card)
         for player in self._players:
             player.add_card([turn_card])
+        self.bidding(4)
 
     def play_table(self):
         self.first_phase()
