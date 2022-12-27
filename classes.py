@@ -2,7 +2,7 @@ from random import shuffle
 
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, id=1):
         self._name = name
         self._chips = 10000
         self._cards = []
@@ -29,10 +29,10 @@ class ComputerPlayer(Player):
 
 
 class HumanPlayer(Player):
-    def calls(self):
+    def call(self):
         pass
 
-    def raises(self, amount):
+    def rais(self, amount):
         pass
 
     def fold(self):
@@ -59,11 +59,11 @@ class Table:
             self._players = []
         else:
             self._players = players
+        self._pot = 0
         self._deck = create_deck()
-        self._deck = shuffle(self._deck)
         self._dealer = players[dealer]
-        self.big_blind = players[(dealer+2) % len(players)]
-        self.big_blind = players[(dealer+1) % len(players)]
+        self._big_blind = players[(dealer+2) % len(players)]
+        self._big_blind = players[(dealer+1) % len(players)]
 
     def first_phase(self):
         for player in self._players:
@@ -109,11 +109,20 @@ def create_deck():
         4: spades
         3: hearts
         2: diamonds
-        1: Clubs
+        1: clubs
+    ranks:
+        1: 1
+        2: 2
+        ...
+        11: jack
+        12: queen
+        13: king:
+        14: ace
     """
     for suit in range(1, 5):
         for rank in range(2, 15):
             deck.append(Card(suit, rank))
+    deck = shuffle(deck)
     return deck
 
 
