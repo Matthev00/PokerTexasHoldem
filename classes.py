@@ -2,15 +2,10 @@ from random import shuffle, randint
 
 
 class Player:
-    def __init__(self, name, id=0):
-        self._name = name
+    def __init__(self, id=0):
         self._chips = 10000
         self._cards = []
         self._id = id
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def id(self):
@@ -40,11 +35,16 @@ class Player:
     def fold(self):
         return (1, 0)
 
-    def play(self):
-        pass
-
 
 class ComputerPlayer(Player):
+    def __init__(self, id=0):
+        super().__init__(id)
+        self._name = f'Computer{id}'
+
+    @property
+    def name(self):
+        return self._name
+
     def make_smart_decision(self, phase, min_bet):
         points = score(self.cards)
         if phase == 1:
@@ -77,8 +77,43 @@ class ComputerPlayer(Player):
                 self.fold()
 
 
+class HumanPlayer(Player):
+    def __init__(self, id=0):
+        super().__init__(id)
+        self._name = 'Player'
+
+    @property
+    def name(self):
+        return self._name
+
+    def print_cards(self):
+        for card in self.cards:
+            print(card)
+
+
 class Card:
     def __init__(self, suit, rank):
+        self.ranks = {
+            2: "Two",
+            3: "Three",
+            4: "Four",
+            5: "Five",
+            6: "Six",
+            7: "Seven",
+            8: "Eight",
+            9: "Nine",
+            10: "Ten",
+            11: "Jack",
+            12: "Queen",
+            13: "King",
+            14: "Ace"
+        }
+        self.suits = {
+            4: "spades",
+            3: "hearts",
+            2: "diamonds",
+            1: "clubs"
+        }
         self._suit = suit
         self._rank = rank
 
@@ -89,6 +124,9 @@ class Card:
     @property
     def rank(self):
         return self._rank
+
+    def __str__(self) -> str:
+        return f'{self.ranks[self.rank]} of {self.suits[self.suit]}'
 
 
 class Table:
@@ -106,16 +144,7 @@ class Table:
         self._big_blind = players[(dealer+2) % len(players)]
         self._small_blind = players[(dealer+1) % len(players)]
 
-    def first_phase(self):
-        for player in self._players:
-            player.add_cards([self._deck.pop(), self._deck.pop()])
-        for player in self._players:
-            self._calls.append(False)
-            self._bets.append(0)
-        self._bets[self._small_blind] = 50
-        self._bets[self._big_blind] = 100
-        max_bet = 100
-        self._pot = 150
+    def bidding(self):
         while False in self._calls:
             if len(self._players) > 1:
                 print(f'{self._players[0].name} won {self._pot}!!!')
@@ -124,32 +153,63 @@ class Table:
             for player in self._players:
                 self._calls[player.id] = False
             for i in range(start, start, 0):
-                to_bet = max_bet - self._bets[i]
-                if isinstance(self._players[i], ComputerPlayer):
+                to_bet = self._max_bet - self._bets[i]
+                if self._players[i].id != 0:
                     data = self._players[i].make_smart_decision(1, to_bet)
                 else:
                     data = self._players[i].play(to_bet)
                 if data[0] == 1:
+                    print(f'{self._players[i].name} folded')
                     self._calls[i] = True
                     self._players.pop(self._players[i])
                 elif data[0] == 2:
+                    print(f'{self._players[i].name} called')
                     self._calls[i] = True
                     self._bets[i] += data[1]
                     self._pot += data[1]
                 else:
+                    print(f'{self._players[i].name} raised {data[1]}')
                     self._bets[i] += data[1]
                     self._pot += data[1]
-                max_bet = max(max_bet, self._bets[i])
+                self._max_bet = max(self._max_bet, self._bets[i])
                 i = (i + 1) % len(self._players)
 
+    def first_phase(self):
+        print('Cards dealt.')
+        print('Your Cards')
+        print('Lets get the bidding started')
+        for player in self._players:
+            player.add_cards([self._deck.pop(), self._deck.pop()])
+        print('Your cards')
+        self._players[0].print_cards()
+        for player in self._players:
+            self._calls.append(False)
+            self._bets.append(0)
+        self._bets[self._small_blind] = 50
+        self._players[self._small_blind].call(50)
+        self._bets[self._big_blind] = 100
+        self._players[self._big_blind].call(100)
+        self._max_bet = 100
+        self._pot = 150
+        self.bidding()
+        print('End of bidding phase')
+
     def flop(self):
+        print('Flop')
+        print('Your cards')
+        self._players[0].print_cards()
         self._cards_on_table = [
             self._deck.pop(),
             self._deck.pop(),
             self._deck.pop()
         ]
+        print("Cards on the table:")
+        for card in self._cards_on_table:
+            print(card)
         for player in self._players:
             player.add_card(self._cards_on_table)
+        self.bidding()
+        print('End of flop phase')
 
     def river(self):
         river_card = self._deck.pop()
@@ -162,6 +222,12 @@ class Table:
         self._cards_on_table.append(turn_card)
         for player in self._players:
             player.add_card([turn_card])
+
+    def play_table(self):
+        self.first_phase()
+        self.flop()
+        self.river()
+        self.turn()
 
 
 class Game:
