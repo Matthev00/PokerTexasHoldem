@@ -2,14 +2,19 @@ from random import shuffle
 
 
 class Player:
-    def __init__(self, name, id=1):
+    def __init__(self, name, id=0):
         self._name = name
         self._chips = 10000
         self._cards = []
+        self._id = id
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def chips(self):
@@ -22,21 +27,50 @@ class Player:
     def cards(self):
         return self._cards
 
-
-class ComputerPlayer(Player):
-    def make_smart_decision(self, phase):
+    def call(self, min_bet):
         pass
 
-
-class HumanPlayer(Player):
-    def call(self):
-        pass
-
-    def rais(self, amount):
+    def raisee(self, min_bet):
         pass
 
     def fold(self):
         pass
+
+    def play(self):
+        pass
+
+
+class ComputerPlayer(Player):
+    def make_smart_decision(self, phase, min_bet):
+        points = score(self.cards)
+        if phase == 1:
+            if min_bet > self.chips / 10 and points > 11:
+                self.call(min_bet)
+            elif min_bet < self.chips / 10 and points > 11:
+                self.raisee(min_bet)
+            else:
+                self.fold()
+        elif phase == 2:
+            if min_bet > self.chips / 7 and points > 100:
+                self.call(min_bet)
+            elif min_bet < self.chips / 7 and points > 100:
+                self.raisee(min_bet)
+            else:
+                self.fold()
+        elif phase == 3:
+            if min_bet > self.chips / 5 and points > 130:
+                self.call(min_bet)
+            elif min_bet < self.chips / 5 and points > 130:
+                self.raisee(min_bet)
+            else:
+                self.fold()
+        elif phase == 4:
+            if min_bet < self.chips and points > 130:
+                self.call(min_bet)
+            elif min_bet < self.chips and points > 130:
+                self.raisee(min_bet)
+            else:
+                self.fold()
 
 
 class Card:
@@ -60,14 +94,49 @@ class Table:
         else:
             self._players = players
         self._pot = 0
+        self._calls = []
+        self._bets = []
+        self._deck = []
         self._deck = create_deck()
         self._dealer = players[dealer]
         self._big_blind = players[(dealer+2) % len(players)]
-        self._big_blind = players[(dealer+1) % len(players)]
+        self._small_blind = players[(dealer+1) % len(players)]
 
     def first_phase(self):
         for player in self._players:
             player.add_cards([self._deck.pop(), self._deck.pop()])
+        for player in self._players:
+            self._calls.append(False)
+            self._bets.append(0)
+        self._bets[self._small_blind] = 50
+        self._bets[self._big_blind] = 100
+        max_bet = 100
+        self._pot = 150
+        while False in self._calls:
+            if len(self._players) > 1:
+                print(f'{self._players[0].name} won {self._pot}!!!')
+                return 'END'
+            start = self._small_blind
+            for player in self._players:
+                self._calls[player.id] = False
+            for i in range(start, start, 0):
+                if isinstance(self._players[i], ComputerPlayer):
+                    to_bet = max_bet - self._bets[i]
+                    data = self._players[i].make_smart_decision(1, to_bet)
+                else:
+                    data = self._players[i].play()
+                if data[0] == 1:
+                    self._calls[i] = True
+                    self._players.pop(self._players[i])
+                elif data[0] == 2:
+                    self._calls[i] = True
+                    self._bets[i] += data[1]
+                    self._pot += data[1]
+                else:
+                    self._bets[i] += data[1]
+                    self._pot += data[1]
+                max_bet = max(max_bet, self._bets[i])
+                i = (i + 1) % len(self._players)
 
     def flop(self):
         self._cards_on_table = [
@@ -127,6 +196,9 @@ def create_deck():
 
 
 def score(players_cards):
+    """
+    returns score of given cards
+    """
     cards = []
     for card in players_cards:
         cards.append((card.suit, card.rank))
