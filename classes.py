@@ -45,9 +45,16 @@ class ComputerPlayer(Player):
     def name(self):
         return self._name
 
-    def raisee(self, min_bet):
+    def raisee(self, min_bet, phase):
         self._chips -= min_bet
-        to_rand = self.chips // 50
+        if phase == 1:
+            to_rand = (self.chips / 10) // 50
+        elif phase == 2:
+            to_rand = (self.chips / 7) // 50
+        elif phase == 3:
+            to_rand = (self.chips / 5) // 50
+        elif phase == 4:
+            to_rand = self.chips // 50
         bet = randint(1, to_rand) * 50
         self._chips -= bet
         return (3, bet+min_bet)
@@ -62,7 +69,7 @@ class ComputerPlayer(Player):
             ):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 10 and points >= 8:
-                ans = self.raisee(min_bet)
+                ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
         elif phase == 2:
@@ -73,7 +80,7 @@ class ComputerPlayer(Player):
             ):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 7 and points > 20:
-                ans = self.raisee(min_bet)
+                ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
         elif phase == 3:
@@ -84,14 +91,14 @@ class ComputerPlayer(Player):
             ):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 5 and points > 70:
-                ans = self.raisee(min_bet)
+                ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
         elif phase == 4:
             if min_bet < self.chips and points > 130:
                 ans = self.call(min_bet)
             elif min_bet <= self.chips and points > 1000:
-                ans = self.raisee(min_bet)
+                ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
         return ans
@@ -116,6 +123,8 @@ class HumanPlayer(Player):
         return (3, bet)
 
     def play(self, to_bet):
+        print(f'Your money: {self.chips}')
+        print()
         print('Options:')
         print(f'1: raise(over {to_bet}, multiple of 50)')
         print(f'2: call({to_bet})')
@@ -123,6 +132,7 @@ class HumanPlayer(Player):
         inp = int(input('Choose option: '))
         if inp == 1:
             ans = self.p_raise(int(input('Your bet: ')))
+            print()
         elif inp == 2:
             ans = self.call(to_bet)
         elif inp == 3:
@@ -214,8 +224,11 @@ class Table:
             if self.potential_end() is True:
                 for index in range(0, len(self._players)):
                     if self._folded[index] is False:
+                        print()
                         print(f'{self._players[index].name} won {self._pot}!!')
                         self._players[index].add_chips(self._pot)
+                        print(25*'-')
+                        print(25*'-')
                 return 'END'
             start = self._small_blind
             for player in self._players:
@@ -235,6 +248,8 @@ class Table:
                     if self._players[i].id != 0:
                         data = self._players[i].make_decision(phase, to_bet)
                     else:
+                        print()
+                        print(f'Current pot: {self._pot}')
                         data = self._players[i].play(to_bet)
                     if data[0] == 1:
                         print(f'{self._players[i].name} folded')
@@ -256,6 +271,15 @@ class Table:
                     i = (i + 1) % len(self._players)
                     k += 1
                     continue
+            if self.potential_end() is True:
+                for index in range(0, len(self._players)):
+                    if self._folded[index] is False:
+                        print()
+                        print(f'{self._players[index].name} won {self._pot}!!')
+                        print(25*'-')
+                        print(25*'-')
+                        self._players[index].add_chips(self._pot)
+                return 'END'
 
     def first_phase(self):
         print('Cards dealt.')
@@ -289,10 +313,10 @@ class Table:
             self._deck.pop(),
             self._deck.pop()
         ]
+        print()
         print("Cards on the table:")
         for card in self._cards_on_table:
             print(card)
-        print()
         for player in self._players:
             player.add_cards(self._cards_on_table)
         print()
@@ -340,12 +364,22 @@ class Table:
     def who_wins(self):
         self._scores = []
         for player in self._players:
-            points, color = player.points()
-            self._scores.append((points, color, player))
+            if not self._folded[player.id]:
+                points, color = player.points()
+                self._scores.append((points, color, player))
         self._scores = sorted(self._scores, key=lambda x: x[0], reverse=True)
-        if self._scores[0][0] > self._scores[1][0]:
+        if len(self._scores) == 1:
             self._scores[0][2].add_chips(self._pot)
+            print()
             print(f'{self._scores[0][2].name} won {self._pot}!!')
+            print(25*'-')
+            print(25*'-')
+        elif self._scores[0][0] > self._scores[1][0]:
+            self._scores[0][2].add_chips(self._pot)
+            print()
+            print(f'{self._scores[0][2].name} won {self._pot}!!')
+            print(25*'-')
+            print(25*'-')
         else:
             win_score = self._scores[0][1]
             winner = self._scores[0][2]
@@ -356,7 +390,10 @@ class Table:
                 else:
                     break
             winner.add_chips(self._pot)
+            print()
             print(f'{winner.name} won {self._pot}!!')
+            print(25*'-')
+            print(25*'-')
 
     def play_table(self):
         if self.first_phase() != 'END':
