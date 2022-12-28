@@ -22,11 +22,11 @@ class Player:
         return self._cards
 
     def call(self, min_bet):
-        self.chips -= min_bet
+        self._chips -= min_bet
         return (2, min_bet)
 
     def raisee(self, min_bet):
-        self.chips -= min_bet
+        self._chips -= min_bet
         to_rand = self.chips // 50
         bet = randint(1, to_rand) * 50
         return (3, bet+min_bet)
@@ -95,6 +95,9 @@ class HumanPlayer(Player):
         print(self.cards[0])
         print(self._cards[1])
 
+    def play(to_bet):
+        pass
+
 
 class Card:
     def __init__(self, suit, rank):
@@ -146,14 +149,14 @@ class Table:
         self._deck = []
         self._deck = create_deck()
         self._dealer = players[dealer]
-        self._big_blind = players[(dealer+2) % len(players)]
-        self._small_blind = players[(dealer+1) % len(players)]
+        self._big_blind = players[(dealer+2) % len(players)].id
+        self._small_blind = players[(dealer+1) % len(players)].id
 
     def bidding(self, phase):
         while False in self._calls:
-            if len(self._players) > 1:
+            if len(self._players) == 1:
                 print(f'{self._players[0].name} won {self._pot}!!')
-                self._players[0].chips += self._pot
+                self._players[0]._chips += self._pot
                 return 'END'
             start = self._small_blind
             for player in self._players:
@@ -182,7 +185,6 @@ class Table:
 
     def first_phase(self):
         print('Cards dealt.')
-        print('Your Cards')
         print('Lets get the bidding started')
         for player in self._players:
             player.add_cards([self._deck.pop(), self._deck.pop()])
@@ -256,7 +258,7 @@ class Table:
             self._scores.append((points, color, player))
         self._scores = sorted(self._scores, reverse=True)
         if self._scores[0][0] > self._scores[1][0]:
-            self._scores[0][2].chips += self._pot
+            self._scores[0][2]._chips += self._pot
             print(f'{self._scores[0][2].name} won {self._pot}!!')
         else:
             win_score = self._scores[0][1]
@@ -299,11 +301,12 @@ class Game:
             else:
                 print("Options:")
                 print(f"1: Go away with {self._player.chips}")
-                print('2: Play at new table')
-                if input("Choose option") == '1':
+                print('2: Play new deal')
+                if input("Choose option: ") == '1':
                     print(f'Your winnings is {self._player.chips}')
                     return self._player.chips
             rund += 1
+            dealer = (dealer + 1) % len(self._players)
 
 
 def create_deck():
@@ -326,7 +329,7 @@ def create_deck():
     for suit in range(1, 5):
         for rank in range(2, 15):
             deck.append(Card(suit, rank))
-    deck = shuffle(deck)
+    shuffle(deck)
     return deck
 
 
@@ -443,3 +446,8 @@ def score(players_cards):
     elif counter1 >= 5:
         score = first1 * 10000
     return (score, score_color)
+
+
+# deck = create_deck()
+# game = Game(3, 'Stefan')
+# game.play()
