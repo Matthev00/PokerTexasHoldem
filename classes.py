@@ -2,10 +2,9 @@ from random import shuffle, randint
 
 
 class Player:
-    def __init__(self, id=0):
+    def __init__(self):
         self._chips = 10000
         self._cards = []
-        self._id = id
 
     @property
     def id(self):
@@ -35,18 +34,22 @@ class Player:
     def fold(self):
         return (1, 0)
 
+    def points(self):
+        return score(self.cards)
+
 
 class ComputerPlayer(Player):
     def __init__(self, id=0):
-        super().__init__(id)
+        super().__init__()
         self._name = f'Computer{id}'
+        self._id = id
 
     @property
     def name(self):
         return self._name
 
     def make_decision(self, phase, min_bet):
-        points = score(self.cards)
+        points, color = self.points()
         if phase == 1:
             if min_bet > self.chips / 10 and points > 11:
                 ans = self.call(min_bet)
@@ -79,9 +82,10 @@ class ComputerPlayer(Player):
 
 
 class HumanPlayer(Player):
-    def __init__(self, id=0):
-        super().__init__(id)
-        self._name = 'Player'
+    def __init__(self, name='Player'):
+        super().__init__()
+        self._id = 0
+        self._name = name
 
     @property
     def name(self):
@@ -148,7 +152,8 @@ class Table:
     def bidding(self, phase):
         while False in self._calls:
             if len(self._players) > 1:
-                print(f'{self._players[0].name} won {self._pot}!!!')
+                print(f'{self._players[0].name} won {self._pot}!!')
+                self._players[0].chips += self._pot
                 return 'END'
             start = self._small_blind
             for player in self._players:
@@ -192,7 +197,8 @@ class Table:
         self._players[self._big_blind].call(100)
         self._max_bet = 100
         self._pot = 150
-        self.bidding(1)
+        if self.bidding(1) == 'END':
+            return 'END'
         print('End of bidding phase')
 
     def flop(self):
@@ -209,7 +215,8 @@ class Table:
             print(card)
         for player in self._players:
             player.add_card(self._cards_on_table)
-        self.bidding(2)
+        if self.bidding(2) == 'END':
+            return 'END'
         print('End of flop phase')
 
     def river(self):
@@ -223,7 +230,9 @@ class Table:
             print(card)
         for player in self._players:
             player.add_card([river_card])
-        self.bidding(3)
+        if self.bidding(3) == 'END':
+            return 'END'
+        print('End of river phase')
 
     def turn(self):
         print('Turn')
@@ -236,24 +245,65 @@ class Table:
             print(card)
         for player in self._players:
             player.add_card([turn_card])
-        self.bidding(4)
+        if self.bidding(4) == 'END':
+            return 'END'
+        print('End of turn phase')
+
+    def who_wins(self):
+        self._scores = []
+        for player in self._players:
+            points, color = player.points()
+            self._scores.append((points, color, player))
+        self._scores = sorted(self._scores, reverse=True)
+        if self._scores[0][0] > self._scores[1][0]:
+            self._scores[0][2].chips += self._pot
+            print(f'{self._scores[0][2].name} won {self._pot}!!')
+        else:
+            win_score = self._scores[0][1]
+            winner = self._scores[0][2]
+            for i in range(1, len(self._scores)):
+                if self._scores[i][0] == self._scores[i-1][0]:
+                    if self._scores[i][1] > win_score:
+                        winner = self._scores[i][2]
+                else:
+                    break
+            winner.chps += self._pot
+            print(f'{winner.name} won {self._pot}!!')
 
     def play_table(self):
-        self.first_phase()
-        self.flop()
-        self.river()
-        self.turn()
+        if self.first_phase() != 'END':
+            if self.flop() != 'END':
+                if self.river() != 'END':
+                    if self.turn() != 'END':
+                        self.who_wins()
 
 
 class Game:
-    def __init__(self, players=None):
-        if not players:
-            self._players = []
-        else:
-            self._players = players
+    def __init__(self, num_of_players, player_name):
+        self._num_of_players = int(num_of_players)
+        self._players = []
+        self._player = HumanPlayer(player_name)
+        self._players.append(self._player)
+        for i in range(1, self._num_of_players+1):
+            computer = ComputerPlayer(i)
+            self._players.append(computer)
 
-    def play():
-        pass
+    def play(self):
+        dealer = randint(1, self._num_of_players) - 1
+        rund = 1
+        while True:
+            table = Table(dealer, self._players)
+            table.play_table()
+            if self._player.chips == 0:
+                print("Unfortunately You've lost")
+            else:
+                print("Options:")
+                print(f"1: Go away with {self._player.chips}")
+                print('2: Play at new table')
+                if input("Choose option") == '1':
+                    print(f'Your winnings is {self._player.chips}')
+                    return self._player.chips
+            rund += 1
 
 
 def create_deck():
