@@ -28,13 +28,6 @@ class Player:
         self._chips -= min_bet
         return (2, min_bet)
 
-    def raisee(self, min_bet):
-        self._chips -= min_bet
-        to_rand = self.chips // 50
-        bet = randint(1, to_rand) * 50
-        self._chips -= bet
-        return (3, bet+min_bet)
-
     def fold(self):
         return (1, 0)
 
@@ -51,6 +44,13 @@ class ComputerPlayer(Player):
     @property
     def name(self):
         return self._name
+
+    def raisee(self, min_bet):
+        self._chips -= min_bet
+        to_rand = self.chips // 50
+        bet = randint(1, to_rand) * 50
+        self._chips -= bet
+        return (3, bet+min_bet)
 
     def make_decision(self, phase, min_bet):
         points, color = self.points()
@@ -111,8 +111,23 @@ class HumanPlayer(Player):
         print(self.cards[0])
         print(self._cards[1])
 
+    def p_raise(self, bet):
+        self._chips -= bet
+        return (3, bet)
+
     def play(self, to_bet):
-        return (1, 0)
+        print('Options:')
+        print(f'1: raise(over {to_bet}, multiple of 50)')
+        print(f'2: call({to_bet})')
+        print('3: fold')
+        inp = int(input('Choose option: '))
+        if inp == 1:
+            ans = self.p_raise(int(input('Your bet: ')))
+        elif inp == 2:
+            ans = self.call(to_bet)
+        elif inp == 3:
+            ans = self.fold()
+        return ans
 
 
 class Card:
