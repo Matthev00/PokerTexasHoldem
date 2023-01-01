@@ -68,7 +68,11 @@ class ComputerPlayer(Player):
                 min_bet < self.chips
             ):
                 ans = self.call(min_bet)
-            elif min_bet < self.chips / 10 and points >= 8:
+            elif (
+                min_bet < self.chips / 10 and
+                points >= 8 and
+                min_bet > 2 * self.chips
+            ):
                 ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
@@ -165,7 +169,7 @@ class Card:
         }
         self._suit = suit
         self._rank = rank
-
+1
     @property
     def suit(self):
         return self._suit
@@ -190,9 +194,9 @@ class Table:
         self._deck = []
         self._folded = []
         self._deck = create_deck()
-        self._dealer = players[dealer]
-        self._big_blind = players[(dealer+2) % len(players)].id
-        self._small_blind = players[(dealer+1) % len(players)].id
+        # self._dealer = players[dealer]
+        self._big_blind = (dealer+2) % len(self._players)
+        self._small_blind = (dealer+1) % len(self._players)
 
     def potential_end(self):
         counter = 0
@@ -230,7 +234,10 @@ class Table:
                         print(25*'-')
                         print(25*'-')
                 return 'END'
-            start = self._small_blind
+            if phase == 1:
+                start = (self._big_blind + 1) % len(self._players)
+            else:
+                start = self._small_blind
             for player in self._players:
                 if self._folded[player.id]:
                     self._calls[player.id] = True
@@ -414,20 +421,38 @@ class Game:
             self._players.append(computer)
 
     def play(self):
-        dealer = randint(1, self._num_of_players) - 1
+        dealer = randint(1, self._num_of_players)
         rund = 1
         while True:
             table = Table(dealer, self._players)
             table.play_table()
+            for player in self._players:
+                if player.chips == 0 and player != self._player:
+                    print(f'{player.name} replaced')
+                    player.add_chips(10000)
+            if len(self._players) == 1:
+                print("You've won. Noone left at the table")
+                print(25*'-')
+                print()
             if self._player.chips == 0:
                 print("Unfortunately You've lost")
+                print(25*'-')
+                print()
             else:
                 print("Options:")
                 print(f"1: Go away with {self._player.chips}")
                 print('2: Play new deal')
+                dealer
                 if input("Choose option: ") == '1':
                     print(f'Your winnings is {self._player.chips}')
+                    if rund == 1:
+                        string_end = 'rund'
+                    else:
+                        string_end = 'runds'
+                    print(f"You've played {rund} {string_end}")
                     return self._player.chips
+                print(25*'-')
+                print()
             rund += 1
             dealer = (dealer + 1) % len(self._players)
 
@@ -573,5 +598,5 @@ def score(players_cards):
 
 
 deck = create_deck()
-game = Game(3, 'Stefan')
+game = Game(4, 'Stefan')
 game.play()
