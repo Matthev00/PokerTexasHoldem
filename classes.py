@@ -154,14 +154,34 @@ class HumanPlayer(Player):
         while True:
             inp = int(input('Choose option: '))
             if inp == 1:
-                ans = self.p_raise(int(input('Your bet: ')))
+                while True:
+                    amount = input('Your bet: ')
+                    try:
+                        amount = int(amount)
+                    except Exception:
+                        print('Bet is not a number!!')
+                        print()
+                        continue
+                    if amount <= to_bet:
+                        first_part = 'Your bet is too low!!'
+                        second_part = f'Bet needs to be at least {to_bet+50}.'
+                        print(f'{first_part} {second_part}')
+                        print()
+                        continue
+                    elif amount % 50 != 0:
+                        print('Your bet is not a multiple of 50')
+                        print()
+                        continue
+                    else:
+                        break
+                ans = self.p_raise(amount)
                 print()
             elif inp == 2:
                 ans = self.call(to_bet)
             elif inp == 3:
                 ans = self.fold()
             else:
-                print("Selected option does not exist!!!!!!!!!!")
+                print("Selected option does not exist!!")
                 print()
                 continue
             break
@@ -493,7 +513,7 @@ class Game:
                         print()
                         break
                     else:
-                        print("Selected option does not exist!!!!!!!!!!")
+                        print("Selected option does not exist!!")
                         print()
                         continue
             dealer = (dealer + 1) % len(self._players)
