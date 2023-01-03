@@ -34,6 +34,10 @@ class Player:
     def points(self):
         return score(self.cards)
 
+    def print_cards(self):
+        print(self.cards[0])
+        print(self._cards[1])
+
 
 class ComputerPlayer(Player):
     def __init__(self, id=0):
@@ -59,28 +63,40 @@ class ComputerPlayer(Player):
         self._chips -= bet
         return (3, bet+min_bet)
 
-    def make_decision(self, phase, min_bet):
+    def make_decision(self, phase, min_bet, pot):
         points, color = self.points()
         if phase == 1:
             if (
-                min_bet > self.chips / 10 and
-                points > 8 and
-                min_bet < self.chips
+                (
+                    min_bet > self.chips / 10 and
+                    points >= 8 and
+                    min_bet < self.chips
+                ) or (
+                    points >= 8 and
+                    min_bet < self.chips and
+                    pot > 3000
+                    )
             ):
                 ans = self.call(min_bet)
             elif (
                 min_bet < self.chips / 10 and
                 points >= 8 and
-                min_bet > 2 * self.chips
+                min_bet < 2 * self.chips
             ):
                 ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
         elif phase == 2:
             if (
-                min_bet > self.chips / 7 and
-                points > 20 and
-                min_bet < self.chips
+                (
+                    min_bet > self.chips / 7 and
+                    points >= 20 and
+                    min_bet < self.chips
+                ) or (
+                    points >= 20 and
+                    min_bet < self.chips and
+                    pot > 4000
+                    )
             ):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 7 and points > 20:
@@ -89,9 +105,15 @@ class ComputerPlayer(Player):
                 ans = self.fold()
         elif phase == 3:
             if (
-                min_bet > self.chips / 5 and
-                points > 70 and
-                min_bet < self.chips
+                (
+                    min_bet > self.chips / 5 and
+                    points >= 70 and
+                    min_bet < self.chips
+                ) or (
+                    points >= 70 and
+                    min_bet < self.chips and
+                    pot > 5000
+                    )
             ):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 5 and points > 70:
@@ -117,10 +139,6 @@ class HumanPlayer(Player):
     @property
     def name(self):
         return self._name
-
-    def print_cards(self):
-        print(self.cards[0])
-        print(self._cards[1])
 
     def p_raise(self, bet):
         self._chips -= bet
@@ -169,7 +187,7 @@ class Card:
         }
         self._suit = suit
         self._rank = rank
-1
+
     @property
     def suit(self):
         return self._suit
@@ -194,9 +212,10 @@ class Table:
         self._deck = []
         self._folded = []
         self._deck = create_deck()
-        # self._dealer = players[dealer]
         self._big_blind = (dealer+2) % len(self._players)
         self._small_blind = (dealer+1) % len(self._players)
+        for player in self._players:
+            player._cards = []
 
     def potential_end(self):
         counter = 0
@@ -230,6 +249,8 @@ class Table:
                     if self._folded[index] is False:
                         print()
                         print(f'{self._players[index].name} won {self._pot}!!')
+                        print('Winner cards:')
+                        self._players[index].print_cards()
                         self._players[index].add_chips(self._pot)
                         print(25*'-')
                         print(25*'-')
@@ -253,7 +274,7 @@ class Table:
                 if self._folded[i] is False:
                     to_bet = self._max_bet - self._bets[i]
                     if self._players[i].id != 0:
-                        data = self._players[i].make_decision(phase, to_bet)
+                        data = self._players[i].make_decision(phase, to_bet, self._pot)
                     else:
                         print()
                         print(f'Current pot: {self._pot}')
@@ -283,6 +304,8 @@ class Table:
                     if self._folded[index] is False:
                         print()
                         print(f'{self._players[index].name} won {self._pot}!!')
+                        print('Winner cards:')
+                        self._players[index].print_cards()
                         print(25*'-')
                         print(25*'-')
                         self._players[index].add_chips(self._pot)
@@ -379,12 +402,16 @@ class Table:
             self._scores[0][2].add_chips(self._pot)
             print()
             print(f'{self._scores[0][2].name} won {self._pot}!!')
+            print('Winner cards:')
+            self._scores[0][2].print_cards()
             print(25*'-')
             print(25*'-')
         elif self._scores[0][0] > self._scores[1][0]:
             self._scores[0][2].add_chips(self._pot)
             print()
             print(f'{self._scores[0][2].name} won {self._pot}!!')
+            print('Winner cards:')
+            self._scores[0][2].print_cards()
             print(25*'-')
             print(25*'-')
         else:
@@ -399,6 +426,8 @@ class Table:
             winner.add_chips(self._pot)
             print()
             print(f'{winner.name} won {self._pot}!!')
+            print('Winner cards:')
+            winner.print_cards()
             print(25*'-')
             print(25*'-')
 
@@ -427,7 +456,7 @@ class Game:
             table = Table(dealer, self._players)
             table.play_table()
             for player in self._players:
-                if player.chips == 0 and player != self._player:
+                if player.chips <= 100 and player != self._player:
                     print(f'{player.name} replaced')
                     player.add_chips(10000)
             if len(self._players) == 1:
@@ -597,6 +626,6 @@ def score(players_cards):
     return (score, score_color)
 
 
-deck = create_deck()
-game = Game(4, 'Stefan')
+# deck = create_deck()
+game = Game(10, 'Stefan')
 game.play()
