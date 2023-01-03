@@ -333,8 +333,10 @@ class Table:
             self._folded.append(False)
         self._bets[self._small_blind] = 50
         self._players[self._small_blind].call(50)
+        print(f'{self._players[self._small_blind].name} is small blind')
         self._bets[self._big_blind] = 100
         self._players[self._big_blind].call(100)
+        print(f'{self._players[self._big_blind].name} is big blind')
         self._max_bet = 100
         self._pot = 150
         if self.bidding(1) == 'END':
