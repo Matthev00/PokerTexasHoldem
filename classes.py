@@ -258,8 +258,8 @@ class Table:
                         print('Winner cards:')
                         self._players[index].print_cards()
                         self._players[index].add_chips(self._pot)
-                        print(25*'-')
-                        print(25*'-')
+                        print(45*'-')
+                        print(45*'-')
                 return 'END'
             if phase == 1:
                 start = (self._big_blind + 1) % len(self._players)
@@ -314,8 +314,8 @@ class Table:
                         print(f'{self._players[index].name} won {self._pot}!!')
                         print('Winner cards:')
                         self._players[index].print_cards()
-                        print(25*'-')
-                        print(25*'-')
+                        print(45*'-')
+                        print(45*'-')
                         self._players[index].add_chips(self._pot)
                 return 'END'
 
@@ -342,7 +342,7 @@ class Table:
         if self.bidding(1) == 'END':
             return 'END'
         print('End of bidding phase')
-        print(25*'-')
+        print(45*'-')
 
     def flop(self):
         print('Flop')
@@ -363,7 +363,7 @@ class Table:
         if self.bidding(2) == 'END':
             return 'END'
         print('End of flop phase')
-        print(25*'-')
+        print(45*'-')
 
     def river(self):
         print('River')
@@ -381,7 +381,7 @@ class Table:
         if self.bidding(3) == 'END':
             return 'END'
         print('End of river phase')
-        print(25*'-')
+        print(45*'-')
 
     def turn(self):
         print('Turn')
@@ -399,7 +399,7 @@ class Table:
         if self.bidding(4) == 'END':
             return 'END'
         print('End of turn phase')
-        print(25*'-')
+        print(45*'-')
 
     def who_wins(self):
         self._scores = []
@@ -414,16 +414,16 @@ class Table:
             print(f'{self._scores[0][2].name} won {self._pot}!!')
             print('Winner cards:')
             self._scores[0][2].print_cards()
-            print(25*'-')
-            print(25*'-')
+            print(45*'-')
+            print(45*'-')
         elif self._scores[0][0] > self._scores[1][0]:
             self._scores[0][2].add_chips(self._pot)
             print()
             print(f'{self._scores[0][2].name} won {self._pot}!!')
             print('Winner cards:')
             self._scores[0][2].print_cards()
-            print(25*'-')
-            print(25*'-')
+            print(45*'-')
+            print(45*'-')
         else:
             win_score = self._scores[0][1]
             winner = self._scores[0][2]
@@ -438,8 +438,8 @@ class Table:
             print(f'{winner.name} won {self._pot}!!')
             print('Winner cards:')
             winner.print_cards()
-            print(25*'-')
-            print(25*'-')
+            print(45*'-')
+            print(45*'-')
 
     def play_table(self):
         if self.first_phase() != 'END':
@@ -637,7 +637,3 @@ def score(players_cards):
     elif counter1 >= 5:
         score = first1 * 10000
     return (score, score_color)
-
-
-game = Game(10, 'Stefan')
-game.play()
