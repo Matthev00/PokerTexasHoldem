@@ -151,14 +151,20 @@ class HumanPlayer(Player):
         print(f'1: raise(over {to_bet}, multiple of 50)')
         print(f'2: call({to_bet})')
         print('3: fold')
-        inp = int(input('Choose option: '))
-        if inp == 1:
-            ans = self.p_raise(int(input('Your bet: ')))
-            print()
-        elif inp == 2:
-            ans = self.call(to_bet)
-        elif inp == 3:
-            ans = self.fold()
+        while True:
+            inp = int(input('Choose option: '))
+            if inp == 1:
+                ans = self.p_raise(int(input('Your bet: ')))
+                print()
+            elif inp == 2:
+                ans = self.call(to_bet)
+            elif inp == 3:
+                ans = self.fold()
+            else:
+                print("Selected option does not exist!!!!!!!!!!")
+                print()
+                continue
+            break
         return ans
 
 
@@ -274,7 +280,9 @@ class Table:
                 if self._folded[i] is False:
                     to_bet = self._max_bet - self._bets[i]
                     if self._players[i].id != 0:
-                        data = self._players[i].make_decision(phase, to_bet, self._pot)
+                        data = self._players[i].make_decision(
+                            phase, to_bet, self._pot
+                            )
                     else:
                         print()
                         print(f'Current pot: {self._pot}')
@@ -459,30 +467,33 @@ class Game:
                 if player.chips <= 100 and player != self._player:
                     print(f'{player.name} replaced')
                     player.add_chips(10000)
-            if len(self._players) == 1:
-                print("You've won. Noone left at the table")
-                print(25*'-')
-                print()
             if self._player.chips == 0:
                 print("Unfortunately You've lost")
                 print(25*'-')
                 print()
             else:
-                print("Options:")
-                print(f"1: Go away with {self._player.chips}")
-                print('2: Play new deal')
-                dealer
-                if input("Choose option: ") == '1':
-                    print(f'Your winnings is {self._player.chips}')
-                    if rund == 1:
-                        string_end = 'rund'
+                while True:
+                    print("Options:")
+                    print(f"1: Go away with {self._player.chips}")
+                    print('2: Play new deal')
+                    choice = input("Choose option: ")
+                    if choice == '1':
+                        print(f'Your winnings is {self._player.chips}')
+                        if rund == 1:
+                            string_end = 'rund'
+                        else:
+                            string_end = 'runds'
+                        print(f"You've played {rund} {string_end}")
+                        return self._player.chips
+                    elif choice == '2':
+                        rund += 1
+                        print(25*'-')
+                        print()
+                        break
                     else:
-                        string_end = 'runds'
-                    print(f"You've played {rund} {string_end}")
-                    return self._player.chips
-                print(25*'-')
-                print()
-            rund += 1
+                        print("Selected option does not exist!!!!!!!!!!")
+                        print()
+                        continue
             dealer = (dealer + 1) % len(self._players)
 
 
@@ -626,6 +637,5 @@ def score(players_cards):
     return (score, score_color)
 
 
-# deck = create_deck()
 game = Game(10, 'Stefan')
 game.play()
