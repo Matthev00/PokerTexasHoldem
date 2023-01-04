@@ -2,54 +2,110 @@ from random import shuffle, randint
 
 
 class Player:
+    """
+    Class Player. Contains attributes:
+    :param chips: player's chips, set to 10000
+    :type chips: int
+
+    :param cards: player's cards, set to empty list
+    :type lives: list
+
+    """
     def __init__(self):
         self._chips = 10000
         self._cards = []
 
     @property
     def id(self):
+        """
+        Player's id getter.
+        """
         return self._id
 
     @property
     def chips(self):
+        """
+        Player's chips getter.
+        """
         return self._chips
 
     def add_chips(self, achips):
+        """
+        Adds new chips to player's chips.
+        """
         self._chips += achips
 
     def add_cards(self, cards):
+        """
+        Adds new cards to player's cards.
+        """
         self._cards += cards
 
     @property
     def cards(self):
+        """
+        Player's cards getter.
+        """
         return self._cards
 
     def call(self, min_bet):
+        """
+        Enable Player to call by:
+        - reducing player's chips by given amount
+        - returning information that player called
+        """
         self._chips -= min_bet
         return (2, min_bet)
 
     def fold(self):
+        """
+        Enable Player to fold
+        Returns information that player folded
+        """
         return (1, 0)
 
     def points(self):
+        """
+        Counts score of player's cards.
+        """
         return score(self.cards)
 
     def print_cards(self):
+        """
+        Prints player's cards.
+        """
         print(self.cards[0])
         print(self._cards[1])
 
 
 class ComputerPlayer(Player):
-    def __init__(self, id=0):
+    """
+    class ComputerPlayer. Inheritance class Player. Contains attributes:
+    :param name: player's name, set 'Computer{id}'
+    :type name: str
+
+    :param id: player's id
+    :type id: int
+    """
+    def __init__(self, id):
         super().__init__()
         self._name = f'Computer{id}'
         self._id = id
 
     @property
     def name(self):
+        """
+        Player's name getter.
+        """
         return self._name
 
     def raisee(self, min_bet, phase):
+        """
+        Enables Player to raise by:
+        - reducing player's chips by given amount
+        - deciding how much player bet based on phase of the game
+        - returning information that player raised anf how much
+        """
         self._chips -= min_bet
         if phase == 1:
             to_rand = (self.chips / 10) // 50
@@ -64,6 +120,13 @@ class ComputerPlayer(Player):
         return (3, bet+min_bet)
 
     def make_decision(self, phase, min_bet, pot):
+        """
+        Makes dacision whether Computer player should:
+        - raise
+        - call
+        - fold
+        based on phase of the game and pot in current game
+        """
         points, color = self.points()
         if phase == 1:
             if (
@@ -131,6 +194,14 @@ class ComputerPlayer(Player):
 
 
 class HumanPlayer(Player):
+    """
+    class HumanPlayer. Inheritance class Player. Contains attributes:
+    :param name: player's name
+    :type name: str
+
+    :param id: player's id, set to 0
+    :type id: int
+    """
     def __init__(self, name='Player'):
         super().__init__()
         self._id = 0
@@ -138,13 +209,27 @@ class HumanPlayer(Player):
 
     @property
     def name(self):
+        """
+        Player's name getter.
+        """
         return self._name
 
     def p_raise(self, bet):
+        """
+        Enables Player to raise by:
+        - reducing player's chips by given amount
+        - returning information that player raised anf how much
+        """
         self._chips -= bet
         return (3, bet)
 
     def play(self, to_bet):
+        """
+        Enables Player to decide whether she/he want to:
+        - raise
+        - call
+        - fold
+        """
         print(f'Your money: {self.chips}')
         print()
         print('Options:')
@@ -159,7 +244,7 @@ class HumanPlayer(Player):
                     try:
                         amount = int(amount)
                     except Exception:
-                        print('Bet is not a number!!')
+                        print('Bet has to a number!!')
                         print()
                         continue
                     if amount <= to_bet:
@@ -189,6 +274,14 @@ class HumanPlayer(Player):
 
 
 class Card:
+    """
+    class Card. Contains attributes:
+    :param suit: player's suit
+    :type suit: int
+
+    :param rank: player's rank
+    :type rank: int
+    """
     def __init__(self, suit, rank):
         self.ranks = {
             2: "Two",
@@ -216,17 +309,55 @@ class Card:
 
     @property
     def suit(self):
+        """
+        Card's suit getter.
+        """
         return self._suit
 
     @property
     def rank(self):
+        """
+        Card's rank getter.
+        """
         return self._rank
 
     def __str__(self) -> str:
+        """
+        Returns basic description of Card.
+        """
         return f'{self.ranks[self.rank]} of {self.suits[self.suit]}'
 
 
 class Table:
+    """
+    Class Player. Contains attributes:
+    :param players: list of players at the table
+    :type players: list of Players
+
+    :param dealer: indicator of dealer at the player
+    :type dealer: int
+
+    :param pot: table's pot
+    :type pot: int
+
+    :param calls: list of players who called
+    :type calls: list
+
+    :param bets: list of players bets
+    :type bets: list
+
+    :param deck: table's deck. Set by functions crate deck()
+    :type deck: list of cards
+
+    :param folded: list of players who folded
+    :type folded: list
+
+    :param big blind: indicator of big blind at the table
+    :type big blind: int
+
+    :param small blind: indicator of small blind at the table
+    :type small blind: int
+    """
     def __init__(self, dealer, players=None):
         if not players:
             self._players = []
@@ -240,10 +371,17 @@ class Table:
         self._deck = create_deck()
         self._big_blind = (dealer+2) % len(self._players)
         self._small_blind = (dealer+1) % len(self._players)
+        """
+        Sets cards to empty list for each player at the table.
+        """
         for player in self._players:
             player._cards = []
 
     def potential_end(self):
+        """
+        Checks if n-1 of n players folded.
+        Returns bool
+        """
         counter = 0
         for element in self._folded:
             if element is False:
@@ -254,6 +392,10 @@ class Table:
             return False
 
     def everyone_called(self):
+        """
+        Checks if n-1 of n players folded.
+        Returns bool
+        """
         counter = 0
         for player in self._calls:
             if player is False:
@@ -264,6 +406,29 @@ class Table:
             return False
 
     def bidding(self, phase):
+        """
+        Bidding
+        For each player sets calls on True if player folded, or False if not
+        Untill method everyone_calles returns True betting continues
+        If potential end returns True:
+        - print Winner and gives him pot
+        - breaks the game
+        If it is first phase starts bidding from player next to Big Blind
+        In another case starts from small blind
+        Enable for each player to make decision:
+        - if it is a computer calls out player.make_smart_decison mathod
+        - if it is human calls out player.play method
+        - this methods returns info what players did
+            - 1 player folded
+                - sets folds and calls on True for player
+            - 2 player called
+                - sets called od True for player
+                - add his bet to bets and to pot
+            - 3 player raised
+                - add his bet to bets and to pot
+        Checks if it is not end of the game in important moments
+        - if it is print winner and gives him pot breaks loop and end game
+        """
         for player in self._players:
             if self._folded[player.id]:
                 self._calls[player.id] = True
@@ -340,6 +505,17 @@ class Table:
                 return 'END'
 
     def first_phase(self):
+        """
+        First phase of play.
+        For each players gives two cards.
+        For each players sets:
+        - calls to False
+        - bets to 0
+        - folded to false
+        Makes big and small blids bet 100 and 50 chips.
+        Update max bet and pot by blinds.
+        Prints needed interface.
+        """
         print('Cards dealt.')
         print('Lets get the bidding started')
         for player in self._players:
@@ -365,6 +541,12 @@ class Table:
         print(45*'-')
 
     def flop(self):
+        """
+        Second phase of play(flop).
+        Puts 3 cards on the table
+        For each players adds cards from table which is needed to count score.
+        Prints needed interface.
+        """
         print('Flop')
         print('Your cards:')
         self._players[0].print_cards()
@@ -386,6 +568,12 @@ class Table:
         print(45*'-')
 
     def river(self):
+        """
+        Third phase of play(river).
+        Puts 1 card on the table
+        For each players adds card from table which is needed to count score.
+        Prints needed interface.
+        """
         print('River')
         print('Your cards:')
         self._players[0].print_cards()
@@ -404,6 +592,12 @@ class Table:
         print(45*'-')
 
     def turn(self):
+        """
+        Fourth phase of play(turn).
+        Puts 1 card on the table
+        For each players adds card from table which is needed to count score.
+        Prints needed interface.
+        """
         print('Turn')
         print('Your cards:')
         self._players[0].print_cards()
@@ -422,6 +616,15 @@ class Table:
         print(45*'-')
 
     def who_wins(self):
+        """
+        Counts score for ech one.
+        Sorts scores.
+        Decides which Player won the game.
+        If there are more then one player with the highest score
+        points the winner by dicinding wich color is higher
+        Add pot to winners chips
+        Prints needed interface
+        """
         self._scores = []
         for player in self._players:
             if not self._folded[player.id]:
@@ -462,6 +665,9 @@ class Table:
             print(45*'-')
 
     def play_table(self):
+        """"
+        Calls out following methods to play the game.
+        """
         if self.first_phase() != 'END':
             if self.flop() != 'END':
                 if self.river() != 'END':
@@ -470,9 +676,27 @@ class Table:
 
 
 class Game:
+    """
+    Class Game. Contains attributes:
+    :param num_of_players: number of computer players
+    :type num_of_players: int
+
+    :param player_name: human player's name
+    :type player_name: str
+
+    :param players: list of players in the game
+    :type players: list of Players
+
+    :param player: human player
+    :type player: HumanPlayer
+    """
     def __init__(self, num_of_players, player_name):
         self._num_of_players = int(num_of_players)
         self._players = []
+        """
+        Creates Human Player and num_of_players Computer Players.
+        Adds them to list of players.
+        """
         self._player = HumanPlayer(player_name)
         self._players.append(self._player)
         for i in range(1, self._num_of_players+1):
@@ -480,6 +704,14 @@ class Game:
             self._players.append(computer)
 
     def play(self):
+        """
+        Draws dealer.
+        Creates instance of class Table.
+        Call out table.paly method.
+        If any of Coputer Player is bankrupt raplaces him.
+        Prints needed interface.
+        After each rund swiches dealer to next player.
+        """
         dealer = randint(1, self._num_of_players)
         rund = 1
         while True:
@@ -522,6 +754,10 @@ class Game:
 def create_deck():
     deck = []
     """
+    Function creates deck of Cards
+    Shuffle it
+    Returns list of Cards
+
     suits:
         4: spades
         3: hearts
@@ -545,7 +781,18 @@ def create_deck():
 
 def score(players_cards):
     """
-    returns score of given cards
+    Searchs for:
+    - high card
+    - pair
+    - two pairs
+    - three of kind
+    - straight
+    - flush
+    - full house
+    - four of kind
+    - straight flush
+    - royal flush
+    Returns score according to score.excl and color of the best score.
     """
     score = 0
     cards = []
