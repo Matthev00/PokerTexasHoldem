@@ -806,7 +806,7 @@ def score(players_cards):
     for i in range(1, len(cards_sorted_by_rank)):
         if cards_sorted_by_rank[i][1] + 1 == cards_sorted_by_rank[i-1][1]:
             counter1 += 1
-            first1 = cards_sorted_by_rank[i-1]
+            first1 = cards_sorted_by_rank[i]
         else:
             counter1 = 0
     pairs = 0
@@ -894,7 +894,7 @@ def score(players_cards):
         for i in range(1, len(chance_for_poker)):
             if chance_for_poker[i] + 1 == chance_for_poker[i-1]:
                 counter += 1
-                first = chance_for_poker[i-1]
+                first = chance_for_poker[i]
             else:
                 counter = 0
         if counter >= 5:
