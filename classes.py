@@ -139,7 +139,7 @@ class ComputerPlayer(Player):
             self._chips -= bet
             return (3, bet+min_bet)
 
-    def make_decision(self, phase, min_bet, bet):
+    def make_decision(self, phase, min_bet, bet, called):
         """
         Makes dacision whether Computer player should:
         - raise
@@ -158,7 +158,11 @@ class ComputerPlayer(Player):
                     points >= 8 and
                     min_bet < self.chips and
                     bet > 2000
-                    )
+                ) or (
+                    points < 8 and
+                    min_bet < self.chips and
+                    called
+                )
             ):
                 ans = self.call(min_bet)
             elif (
@@ -179,7 +183,11 @@ class ComputerPlayer(Player):
                     points >= 20 and
                     min_bet < self.chips and
                     bet > 4000
-                    )
+                ) or (
+                    points < 20 and
+                    min_bet < self.chips and
+                    called
+                )
             ):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 7 and points >= 20:
@@ -196,7 +204,11 @@ class ComputerPlayer(Player):
                     points >= 70 and
                     min_bet < self.chips and
                     bet > 5000
-                    )
+                ) or (
+                    points < 70 and
+                    min_bet < self.chips and
+                    called
+                )
             ):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 5 and points >= 70:
@@ -495,8 +507,12 @@ class Table:
                 if self._folded[i] is False:
                     to_bet = self._max_bet - self._bets[i]
                     if self._players[i].id != 0:
+                        called = self.everyone_called()
                         data = self._players[i].make_decision(
-                            phase, to_bet, self._bets[i] + to_bet
+                            phase,
+                            to_bet,
+                            self._bets[i] + to_bet,
+                            called
                             )
                     else:
                         print()
