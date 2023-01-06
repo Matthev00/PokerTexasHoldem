@@ -1,6 +1,17 @@
 from random import shuffle, randint
 
 
+class NegativeValueError(Exception):
+    def __init__(self, value):
+        super().__init__("Value can not be nagative")
+        self.value = value
+
+
+class OutOfRangeError(Exception):
+    def __init__(self,):
+        super().__init__('Value is out of range')
+
+
 class Player:
     """
     Class Player. Contains attributes:
@@ -23,6 +34,13 @@ class Player:
         return self._id
 
     @property
+    def name(self):
+        """
+        Player's name getter.
+        """
+        return self._name
+
+    @property
     def chips(self):
         """
         Player's chips getter.
@@ -33,11 +51,14 @@ class Player:
         """
         Adds new chips to player's chips.
         """
-        self._chips += achips
+        if achips < 0:
+            raise NegativeValueError(achips)
+        else:
+            self._chips += achips
 
     def add_cards(self, cards):
         """
-        Adds new cards to player's cards.
+        Adds new list of cards to player's cards.
         """
         self._cards += cards
 
@@ -75,7 +96,7 @@ class Player:
         Prints player's cards.
         """
         print(self.cards[0])
-        print(self._cards[1])
+        print(self.cards[1])
 
 
 class ComputerPlayer(Player):
@@ -89,15 +110,11 @@ class ComputerPlayer(Player):
     """
     def __init__(self, id):
         super().__init__()
-        self._name = f'Computer{id}'
+        if id < 0:
+            raise NegativeValueError(id)
+        else:
+            self._name = f'Computer{id}'
         self._id = id
-
-    @property
-    def name(self):
-        """
-        Player's name getter.
-        """
-        return self._name
 
     def raisee(self, min_bet, phase):
         """
@@ -106,26 +123,29 @@ class ComputerPlayer(Player):
         - deciding how much player bet based on phase of the game
         - returning information that player raised anf how much
         """
-        self._chips -= min_bet
-        if phase == 1:
-            to_rand = (self.chips / 10) // 50
-        elif phase == 2:
-            to_rand = (self.chips / 7) // 50
-        elif phase == 3:
-            to_rand = (self.chips / 5) // 50
-        elif phase == 4:
-            to_rand = self.chips // 50
-        bet = randint(1, to_rand) * 50
-        self._chips -= bet
-        return (3, bet+min_bet)
+        if phase not in [1, 2, 3, 4]:
+            raise OutOfRangeError
+        else:
+            self._chips -= min_bet
+            if phase == 1:
+                to_rand = (self.chips / 10) // 50
+            elif phase == 2:
+                to_rand = (self.chips / 7) // 50
+            elif phase == 3:
+                to_rand = (self.chips / 5) // 50
+            elif phase == 4:
+                to_rand = self.chips // 50
+            bet = randint(1, to_rand) * 50
+            self._chips -= bet
+            return (3, bet+min_bet)
 
-    def make_decision(self, phase, min_bet, pot):
+    def make_decision(self, phase, min_bet, bet):
         """
         Makes dacision whether Computer player should:
         - raise
         - call
         - fold
-        based on phase of the game and pot in current game
+        based on phase of the game and player's bet in current game
         """
         points, color = self.points()
         if phase == 1:
@@ -137,7 +157,7 @@ class ComputerPlayer(Player):
                 ) or (
                     points >= 8 and
                     min_bet < self.chips and
-                    pot > 3000
+                    bet > 2000
                     )
             ):
                 ans = self.call(min_bet)
@@ -158,11 +178,11 @@ class ComputerPlayer(Player):
                 ) or (
                     points >= 20 and
                     min_bet < self.chips and
-                    pot > 4000
+                    bet > 4000
                     )
             ):
                 ans = self.call(min_bet)
-            elif min_bet < self.chips / 7 and points > 20:
+            elif min_bet < self.chips / 7 and points >= 20:
                 ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
@@ -175,19 +195,19 @@ class ComputerPlayer(Player):
                 ) or (
                     points >= 70 and
                     min_bet < self.chips and
-                    pot > 5000
+                    bet > 5000
                     )
             ):
                 ans = self.call(min_bet)
-            elif min_bet < self.chips / 5 and points > 70:
+            elif min_bet < self.chips / 5 and points >= 70:
                 ans = self.raisee(min_bet, phase)
             else:
                 ans = self.fold()
         elif phase == 4:
-            if min_bet < self.chips and points > 130:
-                ans = self.call(min_bet)
-            elif min_bet <= self.chips and points > 1000:
+            if min_bet <= self.chips and points > 1000:
                 ans = self.raisee(min_bet, phase)
+            elif min_bet <= self.chips and points > 130:
+                ans = self.call(min_bet)
             else:
                 ans = self.fold()
         return ans
@@ -207,20 +227,18 @@ class HumanPlayer(Player):
         self._id = 0
         self._name = name
 
-    @property
-    def name(self):
-        """
-        Player's name getter.
-        """
-        return self._name
-
     def p_raise(self, bet):
         """
         Enables Player to raise by:
         - reducing player's chips by given amount
         - returning information that player raised anf how much
         """
-        self._chips -= bet
+        if bet < 0:
+            raise NegativeValueError(bet)
+        elif bet > self.chips:
+            raise OutOfRangeError
+        else:
+            self._chips -= bet
         return (3, bet)
 
     def play(self, to_bet):
@@ -237,13 +255,21 @@ class HumanPlayer(Player):
         print(f'2: call({to_bet})')
         print('3: fold')
         while True:
-            inp = int(input('Choose option: '))
+            while True:
+                inp = input('Choose option: ')
+                try:
+                    inp = int(inp)
+                except ValueError:
+                    print('Selected option must be a number')
+                    print()
+                    continue
+                break
             if inp == 1:
                 while True:
                     amount = input('Your bet: ')
                     try:
                         amount = int(amount)
-                    except Exception:
+                    except ValueError:
                         print('Bet has to a number!!')
                         print()
                         continue
@@ -466,7 +492,7 @@ class Table:
                     to_bet = self._max_bet - self._bets[i]
                     if self._players[i].id != 0:
                         data = self._players[i].make_decision(
-                            phase, to_bet, self._pot
+                            phase, to_bet, self._bets[i] + to_bet
                             )
                     else:
                         print()
@@ -798,7 +824,6 @@ def score(players_cards):
     cards = []
     for card in players_cards:
         cards.append((card.suit, card.rank))
-    cards
     ranks = [0 for i in range(2, 17)]
     suits = [0 for i in range(1, 6)]
     cards_sorted_by_rank = sorted(cards, key=lambda x: x[1], reverse=True)
