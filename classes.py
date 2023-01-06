@@ -403,6 +403,10 @@ class Table:
         for player in self._players:
             player._cards = []
 
+    @property
+    def players(self):
+        return self._players
+
     def potential_end(self):
         """
         Checks if n-1 of n players folded.
@@ -412,7 +416,7 @@ class Table:
         for element in self._folded:
             if element is False:
                 counter += 1
-        if counter == 1:
+        if counter <= 1:
             return True
         else:
             return False
@@ -426,7 +430,7 @@ class Table:
         for player in self._calls:
             if player is False:
                 counter += 1
-        if counter == 1:
+        if counter <= 1:
             return True
         else:
             return False
@@ -658,19 +662,21 @@ class Table:
                 self._scores.append((points, color, player))
         self._scores = sorted(self._scores, key=lambda x: x[0], reverse=True)
         if len(self._scores) == 1:
-            self._scores[0][2].add_chips(self._pot)
+            winner = self._scores[0][2]
+            winner.add_chips(self._pot)
             print()
-            print(f'{self._scores[0][2].name} won {self._pot}!!')
+            print(f'{winner.name} won {self._pot}!!')
             print('Winner cards:')
-            self._scores[0][2].print_cards()
+            winner.print_cards()
             print(45*'-')
             print(45*'-')
         elif self._scores[0][0] > self._scores[1][0]:
-            self._scores[0][2].add_chips(self._pot)
+            winner = self._scores[0][2]
+            winner.add_chips(self._pot)
             print()
-            print(f'{self._scores[0][2].name} won {self._pot}!!')
+            print(f'{winner.name} won {self._pot}!!')
             print('Winner cards:')
-            self._scores[0][2].print_cards()
+            winner.print_cards()
             print(45*'-')
             print(45*'-')
         else:
@@ -680,6 +686,7 @@ class Table:
                 if self._scores[i][0] == self._scores[i-1][0]:
                     if self._scores[i][1] > win_score:
                         winner = self._scores[i][2]
+                        win_score = self._scores[i][1]
                 else:
                     break
             winner.add_chips(self._pot)
@@ -689,6 +696,7 @@ class Table:
             winner.print_cards()
             print(45*'-')
             print(45*'-')
+        return winner
 
     def play_table(self):
         """"
@@ -717,7 +725,7 @@ class Game:
     :type player: HumanPlayer
     """
     def __init__(self, num_of_players, player_name):
-        self._num_of_players = int(num_of_players)
+        self._num_of_players = num_of_players
         self._players = []
         """
         Creates Human Player and num_of_players Computer Players.
@@ -738,7 +746,7 @@ class Game:
         Prints needed interface.
         After each rund swiches dealer to next player.
         """
-        dealer = randint(1, self._num_of_players)
+        dealer = randint(0, self._num_of_players)
         rund = 1
         while True:
             table = Table(dealer, self._players)
