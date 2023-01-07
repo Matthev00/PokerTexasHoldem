@@ -216,7 +216,7 @@ class ComputerPlayer(Player):
             else:
                 ans = self.fold()
         elif phase == 4:
-            if min_bet <= self.chips and points > 1000:
+            if min_bet < self.chips and points > 1000:
                 ans = self.raisee(min_bet, phase)
             elif min_bet <= self.chips and points > 130:
                 ans = self.call(min_bet)
@@ -275,6 +275,10 @@ class HumanPlayer(Player):
                     print('Selected option must be a number')
                     print()
                     continue
+                if inp in [1, 2] and self.chips < to_bet:
+                    print('You heve not enought money.')
+                    print()
+                    continue
                 break
             if inp == 1:
                 while True:
@@ -293,6 +297,10 @@ class HumanPlayer(Player):
                         continue
                     elif amount % 50 != 0:
                         print('Your bet is not a multiple of 50')
+                        print()
+                        continue
+                    if amount > self.chips:
+                        print('You heve not enought money.')
                         print()
                         continue
                     else:
@@ -500,7 +508,7 @@ class Table:
             i = start
             k = 0
             while k < len(self._players):
-                if self.potential_end() or self.everyone_called():
+                if self.potential_end():
                     i = (i + 1) % len(self._players)
                     k += 1
                     break
@@ -771,10 +779,11 @@ class Game:
                 if player.chips <= 100 and player != self._player:
                     print(f'{player.name} replaced')
                     player.add_chips(10000)
-            if self._player.chips == 0:
+            if self._player.chips <= 0:
                 print("Unfortunately You've lost")
                 print(25*'-')
                 print()
+                break
             else:
                 while True:
                     print("Options:")
