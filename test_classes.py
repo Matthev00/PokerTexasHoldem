@@ -1,6 +1,6 @@
 from classes import Player, Card, ComputerPlayer, HumanPlayer, Table, Game
 from classes import NegativeValueError, OutOfRangeError
-from classes import create_deck
+from classes import create_deck, score
 import pytest
 
 
@@ -13,7 +13,7 @@ def test_player():
 def test_player_add_chips_typical():
     player = Player()
     player.add_chips(1000)
-    player.chips == 11000
+    assert player.chips == 11000
 
 
 def test_player_add_chips_negative():
@@ -88,7 +88,7 @@ def test_computer_player_make_decision_points_lower_then_8():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 200, 500) == (1, 0)
+    assert player.make_decision(1, 200, 500, False) == (1, 0,)
 
 
 def test_computer_player_make_decision_minbet_too_high():
@@ -98,7 +98,7 @@ def test_computer_player_make_decision_minbet_too_high():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 11000, 500) == (1, 0)
+    assert player.make_decision(1, 11000, 500, False) == (1, 0)
 
 
 def test_computer_player_make_decision_hight_min_bet():
@@ -108,7 +108,7 @@ def test_computer_player_make_decision_hight_min_bet():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 400, 2100) == (2, 400)
+    assert player.make_decision(1, 400, 2100, False) == (2, 400)
 
 
 def test_computer_player_make_decision_bet_higher_then_player_chips():
@@ -118,10 +118,10 @@ def test_computer_player_make_decision_bet_higher_then_player_chips():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 10001, 10001) == (1, 0)
-    assert player.make_decision(2, 10001, 10001) == (1, 0)
-    assert player.make_decision(3, 10001, 10001) == (1, 0)
-    assert player.make_decision(4, 10001, 10001) == (1, 0)
+    assert player.make_decision(1, 10001, 10001, False) == (1, 0)
+    assert player.make_decision(2, 10001, 10001, False) == (1, 0)
+    assert player.make_decision(3, 10001, 10001, False) == (1, 0)
+    assert player.make_decision(4, 10001, 10001, False) == (1, 0)
 
 
 def test_computer_player_make_decision_phase_1_raisee(monkeypatch):
@@ -134,7 +134,7 @@ def test_computer_player_make_decision_phase_1_raisee(monkeypatch):
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 200, 500) == (3, 350)
+    assert player.make_decision(1, 200, 500, False) == (3, 350)
 
 
 def test_computer_player_make_decision_phase_2_low_cards():
@@ -147,7 +147,7 @@ def test_computer_player_make_decision_phase_2_low_cards():
     cards = [card1, card2, card3, card4, card5]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(2, 1500, 2000) == (1, 0)
+    assert player.make_decision(2, 1500, 2000, False) == (1, 0)
 
 
 def test_computer_player_make_decision_phase_2_raisee_pair(monkeypatch):
@@ -163,7 +163,7 @@ def test_computer_player_make_decision_phase_2_raisee_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(2, 400, 500) == (3, 550)
+    assert player.make_decision(2, 400, 500, False) == (3, 550)
 
 
 def test_computer_player_make_decision_phase_3_raisee_pair(monkeypatch):
@@ -180,7 +180,7 @@ def test_computer_player_make_decision_phase_3_raisee_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5, card6]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(3, 400, 500) == (3, 550)
+    assert player.make_decision(3, 400, 500, False) == (3, 550)
 
 
 def test_computer_player_make_decision_phase_4_raisee_2_pair(monkeypatch):
@@ -198,7 +198,7 @@ def test_computer_player_make_decision_phase_4_raisee_2_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5, card6, card7]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(4, 400, 500) == (3, 550)
+    assert player.make_decision(4, 400, 500, False) == (3, 550)
 
 
 def test_computer_player_make_decision_phase_1_call():
@@ -208,7 +208,7 @@ def test_computer_player_make_decision_phase_1_call():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 200, 2050) == (2, 200)
+    assert player.make_decision(1, 200, 2050, False) == (2, 200)
 
 
 def test_computer_player_make_decision_phase_2_call_pair():
@@ -221,7 +221,7 @@ def test_computer_player_make_decision_phase_2_call_pair():
     cards = [card1, card2, card3, card4, card5]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(2, 400, 4050) == (2, 400)
+    assert player.make_decision(2, 400, 4050, False) == (2, 400)
 
 
 def test_computer_player_make_decision_phase_3_call_pair():
@@ -235,7 +235,7 @@ def test_computer_player_make_decision_phase_3_call_pair():
     cards = [card1, card2, card3, card4, card5, card6]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(3, 400, 5050) == (2, 400)
+    assert player.make_decision(3, 400, 5050, False) == (2, 400)
 
 
 def test_computer_player_make_decision_phase_4_call_2_pair(monkeypatch):
@@ -253,7 +253,7 @@ def test_computer_player_make_decision_phase_4_call_2_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5, card6, card7]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(3, 400, 5050) == (2, 400)
+    assert player.make_decision(3, 400, 5050, False) == (2, 400)
 
 
 def test_human_player_typical():
@@ -472,4 +472,208 @@ def test_create_deck():
     deck = create_deck()
     assert len(deck) == 52
     assert type(deck[1]) == Card
-    
+
+
+def test_score_high_card_one_card():
+    card1 = Card(2, 8)
+    cards = [card1]
+    assert score(cards) == (8, 2)
+
+
+def test_score_high_card_seven_cards():
+    card1 = Card(2, 14)
+    card2 = Card(3, 11)
+    card3 = Card(4, 9)
+    card4 = Card(1, 7)
+    card5 = Card(2, 5)
+    card6 = Card(4, 3)
+    card7 = Card(2, 4)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (14, 2)
+
+
+def test_score_pair_in_2_cards():
+    card1 = Card(2, 11)
+    card2 = Card(3, 11)
+    cards = [card1, card2]
+    assert score(cards) == (110, 3)
+
+
+def test_score_pair_in_seven_cards():
+    card1 = Card(2, 11)
+    card2 = Card(3, 11)
+    card3 = Card(4, 9)
+    card4 = Card(1, 7)
+    card5 = Card(2, 5)
+    card6 = Card(4, 3)
+    card7 = Card(2, 4)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (110, 3)
+
+
+def test_score_2_pairs():
+    card1 = Card(2, 11)
+    card2 = Card(3, 11)
+    card7 = Card(4, 9)
+    card6 = Card(1, 9)
+    card5 = Card(2, 5)
+    card3 = Card(4, 3)
+    card4 = Card(2, 4)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (1190, 3)
+
+
+def test_score_2_pairs_aces_on_two():
+    card1 = Card(2, 2)
+    card2 = Card(3, 2)
+    card7 = Card(4, 14)
+    card6 = Card(1, 14)
+    card5 = Card(2, 5)
+    card3 = Card(4, 3)
+    card4 = Card(2, 4)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (1421, 4)
+
+
+def test_score_three_of_kind():
+    card1 = Card(2, 11)
+    card2 = Card(4, 11)
+    card3 = Card(4, 3)
+    card4 = Card(2, 4)
+    card5 = Card(2, 5)
+    card6 = Card(1, 9)
+    card7 = Card(3, 11)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (11000, 4)
+
+
+def test_score_strit_on_2():
+    card1 = Card(2, 2)
+    card2 = Card(4, 3)
+    card3 = Card(4, 10)
+    card4 = Card(2, 5)
+    card5 = Card(2, 4)
+    card6 = Card(1, 2)
+    card7 = Card(3, 6)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (20000, 3)
+
+
+def test_score_strit_on_10():
+    card1 = Card(2, 12)
+    card2 = Card(4, 12)
+    card3 = Card(4, 13)
+    card4 = Card(2, 5)
+    card5 = Card(2, 11)
+    card6 = Card(1, 10)
+    card7 = Card(3, 14)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (100000, 3)
+
+
+def test_score_color_max_card_6():
+    card1 = Card(2, 2)
+    card2 = Card(2, 3)
+    card3 = Card(4, 6)
+    card4 = Card(2, 5)
+    card5 = Card(2, 4)
+    card6 = Card(1, 2)
+    card7 = Card(2, 7)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (700000, 2)
+
+
+def test_score_color_max_card_ace():
+    card1 = Card(4, 2)
+    card2 = Card(3, 10)
+    card3 = Card(4, 10)
+    card4 = Card(4, 5)
+    card5 = Card(4, 4)
+    card6 = Card(4, 3)
+    card7 = Card(4, 14)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (1400000, 4)
+
+
+def test_score_full_2_on_3():
+    card1 = Card(1, 2)
+    card2 = Card(3, 3)
+    card3 = Card(3, 2)
+    card4 = Card(4, 5)
+    card5 = Card(2, 2)
+    card6 = Card(4, 3)
+    card7 = Card(4, 14)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (2000030, 3)
+
+
+def test_score_full_9_on_aces_with_pair_of_10():
+    card1 = Card(1, 9)
+    card2 = Card(3, 10)
+    card3 = Card(3, 9)
+    card4 = Card(3, 14)
+    card5 = Card(2, 9)
+    card6 = Card(4, 10)
+    card7 = Card(4, 14)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (9000140, 3)
+
+
+def test_score_full_aces_on_kings_with_pair_of_10():
+    card1 = Card(1, 14)
+    card2 = Card(3, 10)
+    card3 = Card(3, 14)
+    card4 = Card(3, 13)
+    card5 = Card(2, 14)
+    card6 = Card(4, 10)
+    card7 = Card(4, 13)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (14000130, 3)
+
+
+def test_score_four_of_kind_ace():
+    card1 = Card(1, 14)
+    card2 = Card(4, 10)
+    card3 = Card(3, 14)
+    card4 = Card(2, 10)
+    card5 = Card(2, 14)
+    card6 = Card(3, 10)
+    card7 = Card(4, 14)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (140000000, 4)
+
+
+def test_score_four_of_kind_2():
+    card1 = Card(1, 2)
+    card2 = Card(4, 9)
+    card3 = Card(3, 2)
+    card4 = Card(4, 13)
+    card5 = Card(2, 2)
+    card6 = Card(4, 10)
+    card7 = Card(4, 2)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (20000000, 4)
+
+
+def test_score_poker_on_2_hearts():
+    card1 = Card(3, 2)
+    card2 = Card(2, 6)
+    card3 = Card(3, 3)
+    card4 = Card(3, 5)
+    card5 = Card(3, 4)
+    card6 = Card(4, 5)
+    card7 = Card(3, 6)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (150000002, 3)
+
+
+def test_score_poker_on_10_spades():
+    card1 = Card(4, 14)
+    card2 = Card(4, 6)
+    card3 = Card(4, 10)
+    card4 = Card(4, 13)
+    card5 = Card(4, 12)
+    card6 = Card(4, 5)
+    card7 = Card(4, 11)
+    cards = [card1, card2, card3, card4, card5, card6, card7]
+    assert score(cards) == (150000010, 4)

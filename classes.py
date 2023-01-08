@@ -851,7 +851,9 @@ def score(players_cards):
     - four of kind
     - straight flush
     - royal flush
-    Returns score according to score.excl and color of the best score.
+    in given list of cards.
+    Returns score(points, color) according to score.excl and color of the best
+    score.
     """
     score = 0
     cards = []
@@ -860,21 +862,28 @@ def score(players_cards):
     ranks = [0 for i in range(2, 17)]
     suits = [0 for i in range(1, 6)]
     cards_sorted_by_rank = sorted(cards, key=lambda x: x[1], reverse=True)
-    counter1 = 0
+    counter1 = 1
+    max_counter = 0
     for i in range(1, len(cards_sorted_by_rank)):
-        if cards_sorted_by_rank[i][1] + 1 == cards_sorted_by_rank[i-1][1]:
+        if cards_sorted_by_rank[i][1] == cards_sorted_by_rank[i-1][1]:
+            pass
+        elif cards_sorted_by_rank[i][1] + 1 == cards_sorted_by_rank[i-1][1]:
             counter1 += 1
-            first1 = cards_sorted_by_rank[i]
+            if counter1 > max_counter:
+                first1 = cards_sorted_by_rank[i][1]
         else:
-            counter1 = 0
+            max_counter = max(max_counter, counter1)
+            counter1 = 1
+    max_counter = max(max_counter, counter1)
     pairs = 0
     threes = 0
     fours = 0
+    color = 0
     for rank in cards:
         ranks[rank[1]] += 1
     for suit in cards:
         suits[suit[0]] += 1
-    for i in range(1, 4):
+    for i in range(1, 5):
         if suits[i] >= 5:
             color = i
     for rank in ranks:
@@ -916,9 +925,6 @@ def score(players_cards):
                 elif not low:
                     score += 10 * i
                     low = True
-                    for card in cards_sorted_by_rank:
-                        if card[1] == i:
-                            score_color = max(score_color, card[0])
                 h = True
     elif pairs == 0 and threes >= 1 and fours == 0:
         for i in range(14, 1, -1):
@@ -935,30 +941,44 @@ def score(players_cards):
             if ranks[i] == 3 and not three:
                 score += 1000000 * i
                 three = True
+                for card in cards_sorted_by_rank:
+                    if card[1] == i:
+                        score_color = max(score_color, card[0])
             elif ranks[i] == 2 and not two:
                 two = True
                 score += 10 * i
+
     elif fours:
         for i in range(14, 1, -1):
             if ranks[i] == 4:
                 score = i * 10000000
-    elif color:
+        score_color = 4
+    if color:
         score_color = color
         chance_for_poker = []
         for card in cards_sorted_by_rank:
             if card[0] == color:
                 chance_for_poker.append(card[1])
-        counter = 0
+        max_counter = 0
+        counter = 1
         for i in range(1, len(chance_for_poker)):
             if chance_for_poker[i] + 1 == chance_for_poker[i-1]:
                 counter += 1
-                first = chance_for_poker[i]
+                if counter > max_counter:
+                    first = chance_for_poker[i]
             else:
-                counter = 0
-        if counter >= 5:
+                max_counter = max(max_counter, counter)
+                counter = 1
+        max_counter = max(max_counter, counter)
+        if max_counter >= 5:
             score = 150000000 + first
         else:
             score = chance_for_poker[0] * 100000
-    elif counter1 >= 5:
+    elif max_counter >= 5:
+        score_color = 0
         score = first1 * 10000
+        for card in cards_sorted_by_rank:
+            if card[1] == first1 + 4:
+                score_color = max(score_color, card[0])
+
     return (score, score_color)
