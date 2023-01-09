@@ -71,7 +71,7 @@ class Player:
 
     def call(self, min_bet):
         """
-        Enable Player to call by:
+        Enable. Player to call by:
         - reducing player's chips by given amount
         - returning information that player called
         """
@@ -80,10 +80,19 @@ class Player:
 
     def fold(self):
         """
-        Enable Player to fold
-        Returns information that player folded
+        Enables Player to fold.
+        Returns information that player folded.
         """
         return (1, 0)
+
+    def all_in(self):
+        """
+        Enables Player to raise all in.
+        Returns information that player raised all in.
+        """
+        bet = self._chips
+        self._chips = 0
+        return (4, bet)
 
     def points(self):
         """
@@ -139,12 +148,13 @@ class ComputerPlayer(Player):
             self._chips -= bet
             return (3, bet+min_bet)
 
-    def make_decision(self, phase, min_bet, bet, called):
+    def make_decision(self, phase, min_bet, bet, called, num):
         """
         Makes dacision whether Computer player should:
         - raise
         - call
         - fold
+        - all-in(only with 2 players currentlly betting)
         based on phase of the game and player's bet in current game
         """
         points, color = self.points()
@@ -213,6 +223,12 @@ class ComputerPlayer(Player):
                 ans = self.call(min_bet)
             elif min_bet < self.chips / 5 and points >= 70:
                 ans = self.raisee(min_bet, phase)
+            elif (
+                min_bet > self.chips and
+                points >= 10000 and
+                num == 2
+            ):
+                ans = self.all_in()
             else:
                 ans = self.fold()
         elif phase == 4:
@@ -220,6 +236,12 @@ class ComputerPlayer(Player):
                 ans = self.raisee(min_bet, phase)
             elif min_bet <= self.chips and points > 130:
                 ans = self.call(min_bet)
+            elif (
+                min_bet > self.chips and
+                points >= 10000 and
+                num == 2
+            ):
+                ans = self.all_in()
             else:
                 ans = self.fold()
         return ans
@@ -253,12 +275,13 @@ class HumanPlayer(Player):
             self._chips -= bet
         return (3, bet)
 
-    def play(self, to_bet):
+    def play(self, to_bet, num):
         """
         Enables Player to decide whether she/he want to:
         - raise
         - call
         - fold
+        - all-in(only with 2 players currently betting)
         """
         print(f'Your money: {self.chips}')
         print()
@@ -266,6 +289,8 @@ class HumanPlayer(Player):
         print(f'1: raise(over {to_bet}, multiple of 50)')
         print(f'2: call({to_bet})')
         print('3: fold')
+        if num == 2:
+            print(f'4: all in {self.chips}')
         while True:
             while True:
                 inp = input('Choose option: ')
@@ -311,6 +336,8 @@ class HumanPlayer(Player):
                 ans = self.call(to_bet)
             elif inp == 3:
                 ans = self.fold()
+            elif num == 2 and inp == 4:
+                ans = self.all_in()
             else:
                 print("Selected option does not exist!!")
                 print()
@@ -403,6 +430,12 @@ class Table:
 
     :param small blind: indicator of small blind at the table
     :type small blind: int
+
+    :param players_in_game: numbers of players in current game
+    :type players_in_game: int
+
+    :param all in pot: pot only used with all in
+    :type all in pot: int
     """
     def __init__(self, dealer, players=None):
         if not players:
@@ -417,6 +450,8 @@ class Table:
         self._deck = create_deck()
         self._big_blind = (dealer+2) % len(self._players)
         self._small_blind = (dealer+1) % len(self._players)
+        self._players_in_game = len(players)
+        self._all_in_pot = 0
         """
         Sets cards to empty list for each player at the table.
         """
@@ -476,6 +511,9 @@ class Table:
                 - add his bet to bets and to pot
             - 3 player raised
                 - add his bet to bets and to pot
+            - 4 all-in
+                - add his bet to bets
+                - crates new special pot
         Checks if it is not end of the game in important moments
         - if it is print winner and gives him pot breaks loop and end game
         """
@@ -520,25 +558,41 @@ class Table:
                             phase,
                             to_bet,
                             self._bets[i] + to_bet,
-                            called
+                            called,
+                            self._players_in_game
                             )
                     else:
                         print()
                         print(f'Current pot: {self._pot}')
-                        data = self._players[i].play(to_bet)
+                        data = self._players[i].play(
+                            to_bet,
+                            self._players_in_game
+                            )
                     if data[0] == 1:
                         print(f'{self._players[i].name} folded')
                         self._folded[i] = True
                         self._calls[i] = True
+                        self._players_in_game -= 1
                     elif data[0] == 2:
                         print(f'{self._players[i].name} called')
                         self._calls[i] = True
                         self._bets[i] += data[1]
                         self._pot += data[1]
-                    else:
+                    elif data[0] == 3:
                         print(f'{self._players[i].name} raised {data[1]}')
                         self._bets[i] += data[1]
                         self._pot += data[1]
+                    elif data[0] == 4:
+                        print(f'{self._players[i].name} went all in {data[1]}')
+                        self._bets[i] += data[1]
+                        self._all_in_pot += 2 * data[1]
+                        self._calls[i] = True
+                        for j in range(0, len(self._players)):
+                            if self._bets[j] == self._max_bet:
+                                sub = self._bets[j] - self._bets[i]
+                                self._players[i].add_chips(sub)
+                                break
+
                     self._max_bet = max(self._max_bet, self._bets[i])
                     i = (i + 1) % len(self._players)
                     k += 1

@@ -8,14 +8,14 @@ def main():
     Creates instance of Game.
     Calls out game.play method.
     """
-    print("Wlcome to Poker Texas Hold'em")
+    print("Welcome to Poker Texas Hold'em")
     print(45*'-')
     name = input('Enter your name: ')
     while True:
         num_of_players = input('Enter number of oponents(from 1 to 10): ')
         try:
             num_of_players = int(num_of_players)
-        except Exception:
+        except ValueError:
             print('Number of oponents has to be a number!!')
             print()
             continue
