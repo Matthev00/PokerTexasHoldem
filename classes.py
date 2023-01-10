@@ -148,7 +148,7 @@ class ComputerPlayer(Player):
             self._chips -= bet
             return (3, bet+min_bet)
 
-    def make_decision(self, phase, min_bet, bet, called, num):
+    def make_decision(self, phase, min_bet, bet, called):
         """
         Makes dacision whether Computer player should:
         - raise
@@ -225,8 +225,7 @@ class ComputerPlayer(Player):
                 ans = self.raisee(min_bet, phase)
             elif (
                 min_bet > self.chips and
-                points >= 10000 and
-                num == 2
+                points >= 10000
             ):
                 ans = self.all_in()
             else:
@@ -238,8 +237,7 @@ class ComputerPlayer(Player):
                 ans = self.call(min_bet)
             elif (
                 min_bet > self.chips and
-                points >= 10000 and
-                num == 2
+                points >= 10000
             ):
                 ans = self.all_in()
             else:
@@ -275,7 +273,7 @@ class HumanPlayer(Player):
             self._chips -= bet
         return (3, bet)
 
-    def play(self, to_bet, num):
+    def play(self, to_bet):
         """
         Enables Player to decide whether she/he want to:
         - raise
@@ -289,8 +287,7 @@ class HumanPlayer(Player):
         print(f'1: raise(over {to_bet}, multiple of 50)')
         print(f'2: call({to_bet})')
         print('3: fold')
-        if num == 2:
-            print(f'4: all in {self.chips}')
+        print(f'4: all in {self.chips}')
         while True:
             while True:
                 inp = input('Choose option: ')
@@ -336,7 +333,7 @@ class HumanPlayer(Player):
                 ans = self.call(to_bet)
             elif inp == 3:
                 ans = self.fold()
-            elif num == 2 and inp == 4:
+            elif inp == 4:
                 ans = self.all_in()
             else:
                 print("Selected option does not exist!!")
@@ -434,8 +431,8 @@ class Table:
     :param players_in_game: numbers of players in current game
     :type players_in_game: int
 
-    :param all in pot: pot only used with all in
-    :type all in pot: int
+    :param all in : list of players who a;; in
+    :type all in: list
     """
     def __init__(self, dealer, players=None):
         if not players:
@@ -450,8 +447,7 @@ class Table:
         self._deck = create_deck()
         self._big_blind = (dealer+2) % len(self._players)
         self._small_blind = (dealer+1) % len(self._players)
-        self._players_in_game = len(players)
-        self._all_in_pot = 0
+        self._all_in = []
         """
         Sets cards to empty list for each player at the table.
         """
@@ -493,13 +489,13 @@ class Table:
     def bidding(self, phase):
         """
         Bidding
-        For each player sets calls on True if player folded, or False if not
-        Untill method everyone_calles returns True betting continues
+        For each player sets calls on True if player folded, or False if not.
+        Untill method everyone_calles returns True betting continues.
         If potential end returns True:
         - print Winner and gives him pot
         - breaks the game
-        If it is first phase starts bidding from player next to Big Blind
-        In another case starts from small blind
+        If it is first phase starts bidding from player next to Big Blind.
+        In another case starts from small blind.
         Enable for each player to make decision:
         - if it is a computer calls out player.make_smart_decison mathod
         - if it is human calls out player.play method
@@ -515,14 +511,15 @@ class Table:
                 - add his bet to bets
                 - crates new special pot
         Checks if it is not end of the game in important moments
-        - if it is print winner and gives him pot breaks loop and end game
+        - if it is, print winner and gives him pot breaks loop and end game.
         """
         for player in self._players:
-            if self._folded[player.id]:
+            if self._folded[player.id] or self._all_in[player.id]:
                 self._calls[player.id] = True
             else:
                 self._calls[player.id] = False
-        while self.everyone_called() is False:
+        bets = 1
+        while bets >= 1:
             if self.potential_end() is True:
                 for index in range(0, len(self._players)):
                     if self._folded[index] is False:
@@ -545,6 +542,7 @@ class Table:
                     self._calls[player.id] = False
             i = start
             k = 0
+            bets = 0
             while k < len(self._players):
                 if self.potential_end():
                     i = (i + 1) % len(self._players)
@@ -558,21 +556,16 @@ class Table:
                             phase,
                             to_bet,
                             self._bets[i] + to_bet,
-                            called,
-                            self._players_in_game
+                            called
                             )
                     else:
                         print()
                         print(f'Current pot: {self._pot}')
-                        data = self._players[i].play(
-                            to_bet,
-                            self._players_in_game
-                            )
+                        data = self._players[i].play(to_bet)
                     if data[0] == 1:
                         print(f'{self._players[i].name} folded')
                         self._folded[i] = True
                         self._calls[i] = True
-                        self._players_in_game -= 1
                     elif data[0] == 2:
                         print(f'{self._players[i].name} called')
                         self._calls[i] = True
@@ -582,17 +575,13 @@ class Table:
                         print(f'{self._players[i].name} raised {data[1]}')
                         self._bets[i] += data[1]
                         self._pot += data[1]
+                        bets += 1
                     elif data[0] == 4:
                         print(f'{self._players[i].name} went all in {data[1]}')
                         self._bets[i] += data[1]
-                        self._all_in_pot += 2 * data[1]
+                        self._all_in[i] = True
                         self._calls[i] = True
-                        for j in range(0, len(self._players)):
-                            if self._bets[j] == self._max_bet:
-                                sub = self._bets[j] - self._bets[i]
-                                self._players[i].add_chips(sub)
-                                break
-
+                        self._pot += data[1]
                     self._max_bet = max(self._max_bet, self._bets[i])
                     i = (i + 1) % len(self._players)
                     k += 1
@@ -620,6 +609,7 @@ class Table:
         - calls to False
         - bets to 0
         - folded to false
+        - all in to false
         Makes big and small blids bet 100 and 50 chips.
         Update max bet and pot by blinds.
         Prints needed interface.
@@ -635,6 +625,7 @@ class Table:
             self._calls.append(False)
             self._bets.append(0)
             self._folded.append(False)
+            self._all_in.append(False)
         self._bets[self._small_blind] = 50
         self._players[self._small_blind].call(50)
         print(f'{self._players[self._small_blind].name} is small blind')
@@ -643,6 +634,7 @@ class Table:
         print(f'{self._players[self._big_blind].name} is big blind')
         self._max_bet = 100
         self._pot = 150
+
         if self.bidding(1) == 'END':
             return 'END'
         print('End of bidding phase')
@@ -741,22 +733,8 @@ class Table:
         self._scores = sorted(self._scores, key=lambda x: x[0], reverse=True)
         if len(self._scores) == 1:
             winner = self._scores[0][2]
-            winner.add_chips(self._pot)
-            print()
-            print(f'{winner.name} won {self._pot}!!')
-            print('Winner cards:')
-            winner.print_cards()
-            print(45*'-')
-            print(45*'-')
         elif self._scores[0][0] > self._scores[1][0]:
             winner = self._scores[0][2]
-            winner.add_chips(self._pot)
-            print()
-            print(f'{winner.name} won {self._pot}!!')
-            print('Winner cards:')
-            winner.print_cards()
-            print(45*'-')
-            print(45*'-')
         else:
             win_score = self._scores[0][1]
             winner = self._scores[0][2]
@@ -767,13 +745,23 @@ class Table:
                         win_score = self._scores[i][1]
                 else:
                     break
-            winner.add_chips(self._pot)
-            print()
-            print(f'{winner.name} won {self._pot}!!')
-            print('Winner cards:')
-            winner.print_cards()
-            print(45*'-')
-            print(45*'-')
+        if self._all_in[winner.id] is False:
+            win = self._pot
+        else:
+            win = 0
+            winner_bet = self._bets[winner.id]
+            for i in range(0, len(self._players)):
+                lost = min(self._bets[i], winner_bet)
+                win += lost
+                self._bets[i] -= lost
+                self._players[i].add_chips(self._bets[i])
+        winner.add_chips(win)
+        print()
+        print(f'{winner.name} won {win}!!')
+        print('Winner cards:')
+        winner.print_cards()
+        print(45*'-')
+        print(45*'-')
         return winner
 
     def play_table(self):
@@ -851,7 +839,7 @@ class Game:
                         else:
                             string_end = 'runds'
                         print(f"You've played {rund} {string_end}")
-                        return self._player.chips
+                        return self._player
                     elif choice == '2':
                         rund += 1
                         print(25*'-')

@@ -93,7 +93,7 @@ def test_computer_player_make_decision_points_lower_then_8():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 200, 500, False, 3) == (1, 0,)
+    assert player.make_decision(1, 200, 500, False) == (1, 0,)
 
 
 def test_computer_player_make_decision_minbet_too_high():
@@ -103,7 +103,7 @@ def test_computer_player_make_decision_minbet_too_high():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 11000, 500, False, 3) == (1, 0)
+    assert player.make_decision(1, 11000, 500, False) == (1, 0)
 
 
 def test_computer_player_make_decision_hight_min_bet():
@@ -113,7 +113,7 @@ def test_computer_player_make_decision_hight_min_bet():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 400, 2100, False, 3) == (2, 400)
+    assert player.make_decision(1, 400, 2100, False) == (2, 400)
 
 
 def test_computer_player_make_decision_bet_higher_then_player_chips():
@@ -123,10 +123,10 @@ def test_computer_player_make_decision_bet_higher_then_player_chips():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 10001, 10001, False, 3) == (1, 0)
-    assert player.make_decision(2, 10001, 10001, False, 3) == (1, 0)
-    assert player.make_decision(3, 10001, 10001, False, 3) == (1, 0)
-    assert player.make_decision(4, 10001, 10001, False, 3) == (1, 0)
+    assert player.make_decision(1, 10001, 10001, False) == (1, 0)
+    assert player.make_decision(2, 10001, 10001, False) == (1, 0)
+    assert player.make_decision(3, 10001, 10001, False) == (1, 0)
+    assert player.make_decision(4, 10001, 10001, False) == (1, 0)
 
 
 def test_computer_player_make_decision_phase_1_raisee(monkeypatch):
@@ -139,7 +139,7 @@ def test_computer_player_make_decision_phase_1_raisee(monkeypatch):
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 200, 500, False, 3) == (3, 350)
+    assert player.make_decision(1, 200, 500, False) == (3, 350)
 
 
 def test_computer_player_make_decision_phase_2_low_cards():
@@ -152,7 +152,7 @@ def test_computer_player_make_decision_phase_2_low_cards():
     cards = [card1, card2, card3, card4, card5]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(2, 1500, 2000, False, 3) == (1, 0)
+    assert player.make_decision(2, 1500, 2000, False) == (1, 0)
 
 
 def test_computer_player_make_decision_phase_2_raisee_pair(monkeypatch):
@@ -168,7 +168,7 @@ def test_computer_player_make_decision_phase_2_raisee_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(2, 400, 500, False, 3) == (3, 550)
+    assert player.make_decision(2, 400, 500, False) == (3, 550)
 
 
 def test_computer_player_make_decision_phase_3_raisee_pair(monkeypatch):
@@ -185,7 +185,7 @@ def test_computer_player_make_decision_phase_3_raisee_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5, card6]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(3, 400, 500, False, 3) == (3, 550)
+    assert player.make_decision(3, 400, 500, False) == (3, 550)
 
 
 def test_computer_player_make_decision_phase_4_raisee_2_pair(monkeypatch):
@@ -203,7 +203,7 @@ def test_computer_player_make_decision_phase_4_raisee_2_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5, card6, card7]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(4, 400, 500, False, 3) == (3, 550)
+    assert player.make_decision(4, 400, 500, False) == (3, 550)
 
 
 def test_computer_player_make_decision_phase_1_call():
@@ -213,7 +213,7 @@ def test_computer_player_make_decision_phase_1_call():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(1, 200, 2050, False, 3) == (2, 200)
+    assert player.make_decision(1, 200, 2050, False) == (2, 200)
 
 
 def test_computer_player_make_decision_phase_2_call_pair():
@@ -226,7 +226,7 @@ def test_computer_player_make_decision_phase_2_call_pair():
     cards = [card1, card2, card3, card4, card5]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(2, 400, 4050, False, 3) == (2, 400)
+    assert player.make_decision(2, 400, 4050, False) == (2, 400)
 
 
 def test_computer_player_make_decision_phase_3_call_pair():
@@ -240,7 +240,7 @@ def test_computer_player_make_decision_phase_3_call_pair():
     cards = [card1, card2, card3, card4, card5, card6]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(3, 400, 5050, False, 3) == (2, 400)
+    assert player.make_decision(3, 400, 5050, False) == (2, 400)
 
 
 def test_computer_player_make_decision_phase_3_all_in_three_of_kind():
@@ -255,7 +255,7 @@ def test_computer_player_make_decision_phase_3_all_in_three_of_kind():
     cards = [card1, card2, card3, card4, card5, card6, card7]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(3, 11000, 5050, False, 2) == (4, 10000)
+    assert player.make_decision(3, 11000, 5050, False) == (4, 10000)
 
 
 def test_computer_player_make_decision_phase_4_call_2_pair(monkeypatch):
@@ -273,7 +273,7 @@ def test_computer_player_make_decision_phase_4_call_2_pair(monkeypatch):
     cards = [card1, card2, card3, card4, card5, card6, card7]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(4, 400, 5050, False, 3) == (2, 400)
+    assert player.make_decision(4, 400, 5050, False) == (2, 400)
 
 
 def test_computer_player_make_decision_phase_4_all_in_three_of_kind():
@@ -288,7 +288,7 @@ def test_computer_player_make_decision_phase_4_all_in_three_of_kind():
     cards = [card1, card2, card3, card4, card5, card6, card7]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.make_decision(4, 11000, 5050, False, 2) == (4, 10000)
+    assert player.make_decision(4, 11000, 5050, False) == (4, 10000)
 
 
 def test_human_player_typical():
@@ -332,7 +332,7 @@ def test_human_player_play_call(monkeypatch):
     player = HumanPlayer()
     assert player.chips == 10000
     monkeypatch.setattr('builtins.input', lambda _: "2")
-    assert player.play(200, 3) == (2, 200)
+    assert player.play(200) == (2, 200)
     assert player.chips == 9800
 
 
@@ -340,7 +340,7 @@ def test_human_player_play_fold(monkeypatch):
     player = HumanPlayer()
     assert player.chips == 10000
     monkeypatch.setattr('builtins.input', lambda _: "3")
-    assert player.play(200, 3) == (1, 0)
+    assert player.play(200) == (1, 0)
     assert player.chips == 10000
 
 
@@ -348,7 +348,7 @@ def test_human_player_play_all_in(monkeypatch):
     player = HumanPlayer()
     assert player.chips == 10000
     monkeypatch.setattr('builtins.input', lambda _: "4")
-    assert player.play(200, 2) == (4, 10000)
+    assert player.play(200) == (4, 10000)
     assert player.chips == 0
 
 
@@ -486,6 +486,7 @@ def test_table_who_wins_equal_point_dif_col():
     players = [player, com1, com2]
     table = Table(1, players)
     table._folded = [False, False, False]
+    table._all_in = [False, False, False]
     player._cards = [Card(3, 14), Card(2, 12)]
     com1._cards = [Card(2, 14), Card(1, 12)]
     com2._cards = [Card(4, 14), Card(3, 12)]
@@ -499,10 +500,30 @@ def test_table_who_wins_typical():
     players = [player, com1, com2]
     table = Table(1, players)
     table._folded = [False, False, False]
+    table._all_in = [False, False, False]
     player._cards = [Card(3, 14), Card(2, 12)]
     com1._cards = [Card(2, 13), Card(1, 12)]
     com2._cards = [Card(4, 12), Card(3, 11)]
     assert table.who_wins() == player
+
+
+def test_table_who_wins_all_in():
+    player = HumanPlayer()
+    com1 = ComputerPlayer(1)
+    com2 = ComputerPlayer(2)
+    players = [player, com1, com2]
+    table = Table(1, players)
+    table._folded = [False, True, True]
+    table._all_in = [True, False, False]
+    table._bets = [10000, 15000, 400]
+    com1._chips = 0
+    player._chips = 0
+    player._cards = [Card(3, 14), Card(2, 12)]
+    com1._cards = [Card(2, 14), Card(1, 12)]
+    com2._cards = [Card(4, 14), Card(3, 12)]
+    assert table.who_wins() == player
+    assert com1.chips == 5000
+    assert player.chips == 20400
 
 
 def test_game():
