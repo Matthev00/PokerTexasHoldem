@@ -1,0 +1,7 @@
+place,name,score
+1,Mateusz,20000
+2,Stefan,12650
+3,Mariusz,10150
+3,Mariola,10150
+5,Jurek,8750
+6,Khabib,6900

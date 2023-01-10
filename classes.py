@@ -823,7 +823,7 @@ class Game:
                     player.add_chips(10000)
             if self._player.chips <= 0:
                 print("Unfortunately You've lost")
-                print(25*'-')
+                print(45*'-')
                 print()
                 break
             else:
