@@ -518,8 +518,8 @@ class Table:
                 self._calls[player.id] = True
             else:
                 self._calls[player.id] = False
-        bets = 1
-        while bets >= 1:
+        bets = 2
+        while bets > 1:
             if self.potential_end() is True:
                 for index in range(0, len(self._players)):
                     if self._folded[index] is False:
@@ -583,6 +583,8 @@ class Table:
                         self._calls[i] = True
                         self._pot += data[1]
                     self._max_bet = max(self._max_bet, self._bets[i])
+                    if self._players[i].id == 0:
+                        print(25*'+')
                     i = (i + 1) % len(self._players)
                     k += 1
                 else:
@@ -825,7 +827,7 @@ class Game:
                 print("Unfortunately You've lost")
                 print(45*'-')
                 print()
-                break
+                return self._player
             else:
                 while True:
                     print("Options:")
@@ -842,7 +844,7 @@ class Game:
                         return self._player
                     elif choice == '2':
                         rund += 1
-                        print(25*'-')
+                        print(45*'-')
                         print()
                         break
                     else:

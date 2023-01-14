@@ -16,6 +16,9 @@ class Database:
         self.ranking = []
 
     def load_from_file(self, path='ranking.txt'):
+        """
+        Loads ranking from .txt file.
+        """
         try:
             with open(path, 'r') as file_handle:
                 self.ranking = read_file(file_handle)
@@ -25,6 +28,9 @@ class Database:
             raise RankingPermissionError()
 
     def save_to_file(self, path='ranking.txt'):
+        """
+        Saves new ranking to .txt file.
+        """
         try:
             with open(path, 'w') as file_handle:
                 write_to_file(file_handle, self.ranking)
@@ -32,6 +38,9 @@ class Database:
             raise RankingPermissionError()
 
     def add_to_ranking(self, record):
+        """
+        Adds new record to ranking and reorganizes it.
+        """
         self.load_from_file()
         name, score = record
         place = 0
@@ -54,6 +63,9 @@ class Database:
         return place
 
     def print_ranking(self, num):
+        """
+        Prints ranking.
+        """
         place = 'Place'
         name = 'Name'
         score = 'Score'

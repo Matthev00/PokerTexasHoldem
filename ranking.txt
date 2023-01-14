@@ -1,7 +1,9 @@
 place,name,score
-1,Mateusz,20000
-2,Stefan,12650
-3,Mariusz,10150
-3,Mariola,10150
-5,Jurek,8750
-6,Khabib,6900
+1,Adi,21900
+2,Mateusz,20000
+3,Ari,14000
+4,Stefan,12650
+5,Mariusz,10150
+5,Mariola,10150
+7,Jurek,8750
+8,Khabib,6900
