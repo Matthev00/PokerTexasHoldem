@@ -39,7 +39,7 @@ def test_player_print_cards_points():
     cards = [card1, card2]
     assert player.cards == []
     player.add_cards(cards)
-    assert player.points() == (5, 1)
+    assert player.points() == (5.04, 1)
 
 
 def test_player_fold():
@@ -507,6 +507,21 @@ def test_table_who_wins_typical():
     assert table.who_wins() == player
 
 
+def test_table_who_wins_high_card():
+    player = HumanPlayer()
+    com1 = ComputerPlayer(1)
+    com2 = ComputerPlayer(2)
+    players = [player, com1, com2]
+    table = Table(1, players)
+    table._folded = [False, False, False]
+    table._all_in = [False, False, False]
+    cards = [Card(2, 14), Card(2, 13), Card(3, 7), Card(1, 2), Card(3, 4)]
+    player._cards = [Card(3, 12), Card(2, 11)] + cards
+    com1._cards = [Card(2, 11), Card(1, 10)] + cards
+    com2._cards = [Card(4, 10), Card(3, 9)] + cards
+    assert table.who_wins() == player
+
+
 def test_table_who_wins_all_in():
     player = HumanPlayer()
     com1 = ComputerPlayer(1)
@@ -538,10 +553,11 @@ def test_create_deck():
     assert type(deck[1]) == Card
 
 
-def test_score_high_card_one_card():
+def test_score_high_card_two_card():
     card1 = Card(2, 8)
-    cards = [card1]
-    assert score(cards) == (8, 2)
+    card2 = Card(2, 7)
+    cards = [card1, card2]
+    assert score(cards) == (8.07, 2)
 
 
 def test_score_high_card_seven_cards():
@@ -553,7 +569,7 @@ def test_score_high_card_seven_cards():
     card6 = Card(4, 3)
     card7 = Card(2, 4)
     cards = [card1, card2, card3, card4, card5, card6, card7]
-    assert score(cards) == (14, 2)
+    assert score(cards) == (14.11, 2)
 
 
 def test_score_pair_in_2_cards():
@@ -572,7 +588,7 @@ def test_score_pair_in_seven_cards():
     card6 = Card(4, 3)
     card7 = Card(2, 4)
     cards = [card1, card2, card3, card4, card5, card6, card7]
-    assert score(cards) == (110, 3)
+    assert score(cards) == (110.90705, 3)
 
 
 def test_score_2_pairs():
@@ -584,7 +600,7 @@ def test_score_2_pairs():
     card3 = Card(4, 3)
     card4 = Card(2, 4)
     cards = [card1, card2, card3, card4, card5, card6, card7]
-    assert score(cards) == (1190, 3)
+    assert score(cards) == (1190.05, 3)
 
 
 def test_score_2_pairs_aces_on_two():
@@ -596,7 +612,7 @@ def test_score_2_pairs_aces_on_two():
     card3 = Card(4, 3)
     card4 = Card(2, 4)
     cards = [card1, card2, card3, card4, card5, card6, card7]
-    assert score(cards) == (1421, 4)
+    assert score(cards) == (1421.05, 4)
 
 
 def test_score_three_of_kind():
@@ -608,7 +624,7 @@ def test_score_three_of_kind():
     card6 = Card(1, 9)
     card7 = Card(3, 11)
     cards = [card1, card2, card3, card4, card5, card6, card7]
-    assert score(cards) == (11000, 4)
+    assert score(cards) == (11009.05, 4)
 
 
 def test_score_strit_on_2():
@@ -704,7 +720,7 @@ def test_score_four_of_kind_ace():
     card6 = Card(3, 10)
     card7 = Card(4, 14)
     cards = [card1, card2, card3, card4, card5, card6, card7]
-    assert score(cards) == (140000000, 4)
+    assert score(cards) == (140000000.1, 4)
 
 
 def test_score_four_of_kind_2():
@@ -716,7 +732,7 @@ def test_score_four_of_kind_2():
     card6 = Card(4, 10)
     card7 = Card(4, 2)
     cards = [card1, card2, card3, card4, card5, card6, card7]
-    assert score(cards) == (20000000, 4)
+    assert score(cards) == (20000000.13, 4)
 
 
 def test_score_poker_on_2_hearts():

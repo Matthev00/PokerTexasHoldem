@@ -917,6 +917,7 @@ def score(players_cards):
     """
     score = 0
     cards = []
+    cards_in_hand = [players_cards[0], players_cards[1]]
     for card in players_cards:
         cards.append((card.suit, card.rank))
     ranks = [0 for i in range(2, 17)]
@@ -939,6 +940,7 @@ def score(players_cards):
     threes = 0
     fours = 0
     color = 0
+    used = []
     for rank in cards:
         ranks[rank[1]] += 1
     for suit in cards:
@@ -955,26 +957,34 @@ def score(players_cards):
             fours += 1
     score_color = 0
     if pairs == 0 and threes == 0 and fours == 0:
-        for i in range(14, 1, -1):
-            if ranks[i] == 1:
-                score = i
-                for card in cards_sorted_by_rank:
-                    if card[1] == i:
-                        score_color = max(score_color, card[0])
-                break
+        if cards_in_hand[0].rank > cards_in_hand[1].rank:
+            score = cards_in_hand[0].rank + cards_in_hand[1].rank/100
+            score_color = cards_in_hand[0].suit
+        else:
+            score = cards_in_hand[1].rank + cards_in_hand[0].rank/100
+            score_color = cards_in_hand[1].suit
     elif pairs == 1 and threes == 0 and fours == 0:
         for i in range(14, 1, -1):
             if ranks[i] == 2:
+                used.append(i)
                 score = 10 * i
                 for card in cards_sorted_by_rank:
                     if card[1] == i:
                         score_color = max(score_color, card[0])
                 break
+        count = 10
+        for i in range(14, 1, -1):
+            if i not in used and ranks[i]:
+                score += i/count
+                count *= 100
+                if count > 1000000:
+                    break
     elif pairs >= 2 and threes == 0 and fours == 0:
         h = False
         low = False
         for i in range(14, 1, -1):
             if ranks[i] == 2:
+                used.append(i)
                 if not h:
                     if i == 14:
                         score += 1
@@ -986,14 +996,26 @@ def score(players_cards):
                     score += 10 * i
                     low = True
                 h = True
+        for i in range(14, 1, -1):
+            if i not in used and ranks[i]:
+                score += i/100
+                break
     elif pairs == 0 and threes >= 1 and fours == 0:
         for i in range(14, 1, -1):
             if ranks[i] == 3:
+                used.append(i)
                 score = 1000 * i
                 for card in cards_sorted_by_rank:
                     if card[1] == i:
                         score_color = max(score_color, card[0])
                 break
+        count = 1
+        for i in range(14, 1, -1):
+            if i not in used and ranks[i]:
+                score += i/count
+                count *= 100
+                if count > 100:
+                    break
     elif pairs >= 1 and threes >= 1 and fours == 0:
         three = False
         two = False
@@ -1007,12 +1029,16 @@ def score(players_cards):
             elif ranks[i] == 2 and not two:
                 two = True
                 score += 10 * i
-
     elif fours:
         for i in range(14, 1, -1):
             if ranks[i] == 4:
+                used.append(i)
                 score = i * 10000000
         score_color = 4
+        for i in range(14, 1, -1):
+            if i not in used and ranks[i]:
+                score += i/100
+                break
     if color:
         score_color = color
         chance_for_poker = []
@@ -1040,5 +1066,5 @@ def score(players_cards):
         for card in cards_sorted_by_rank:
             if card[1] == first1 + 4:
                 score_color = max(score_color, card[0])
-
+    score = round(score, 5)
     return (score, score_color)
