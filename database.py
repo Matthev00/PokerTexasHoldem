@@ -66,12 +66,18 @@ class Database:
         """
         Prints ranking.
         """
+        num = min(num, len(self.ranking))
+        print(f"Top {num} scores")
         place = 'Place'
         name = 'Name'
         score = 'Score'
-        print(f'{place:>5}{name:>20}{score:>7}')
+        print(f'{place:>5}{name:>20}{score:>8}')
         for i in range(0, num):
             place = self.ranking[i][0]
+            place += '.'
             name = self.ranking[i][1]
+            if len(name) > 20:
+                name = name[:17]
+                name += '...'
             score = self.ranking[i][2]
-            print(f'{place:>5}{name:>20}{score:>7}')
+            print(f'{place:<5}{name:>20}{score:>8}')

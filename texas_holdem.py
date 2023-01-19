@@ -30,7 +30,6 @@ def main():
                 print(f'You are {place} in the ranking.')
                 print()
                 print(45*'-')
-                print("Top 5 scores")
                 database.print_ranking(5)
             break
         else:
