@@ -1,39 +1,35 @@
-## Name
-Choose a self-explaining name for your project.
+## Poker Texas Hold'em
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Cel
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Celem projektu było zrealizowanie gry w poker w odmianie texas hold'em, w której gracz może zmierzyc się z komputerem/ami, których decyzje mają być zauważalnie lepsze niż losowe.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Uruchomienie i sposób użytkowania
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Aby zagrać należy uruchomić plik texas_holdem.py(cała rozgrywka odbywa się w terminalu).
+Następnie nalezy wprowadzić nazwę gracza, jeżeli nie zostanie wprowadzona to domyślnie ustawiana jest na 'Player', oraz liczbę graczy komputerowych(od 1 do 10 włącznie)
+Gra się rozpoczyna.
+Każdy z graczy ma na początku 10000.
+Gracz może rozegrać nieskończenie wiele rund dopóki nie zdecyduje się odejść od stołu bądź straci wszystkie pieniądze.
+Każda z rund rozpoczyna się od fazy licytacji, w której kazdy z graczy dostaje 2 karty.
+Gracz podczas licytacji w kazdej turze może wybrać jedną z 4 opcji:
+    - raise (podbicie powyżej podanej minimalnej stawki, wielokrotność 50)
+    - call (sprawdzenie z podaną stawką)
+    - fold (odpadznięcie z rundy)
+    - all in (wejście ze wszystkimi swoimi pieniędzmi)
+Kolejną fazą jest flop, w której pojawiają się trzy karty na stole. Znowu nastepuje licytacja.
+Następną fazą jest river w której na stole pojawia się jedna karta. Licytacja analogicznie.
+W fazie turn równiez pojawia się na stole jedna karta. Licytacja ma wymiar ostateczny.
+Nastepnie ogłaszany jest zwycięzsca.
+Jeżeli w ktorym kolwiek momencie przy stole zostaje jeden gracz runda się kończy, a zwycięzszca zgarnia nagrodę.
+Wszelkie potrzebnę komunikaty wyświetlane są w terminalu.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Co i jak ze sobą gada
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Głównym plikiem jest texas_holdem.py gdzie znajduję się wstępny interfejs i tworzą sie instacje klas game oraz databese. Importowane są one z plików calasses.py oraz database.py.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Wszystkie niezbędne klasy niezwiązane z rankingiem znadują się w classes.py. Są tam klasy graczy, nadrzędna Player i 2 podrzędne ComputerPlayer oraz HumanPlayer, istotną funkcją tej pierwszej jest metoda meke_decision(), która pozwala komputerowi podjąc decyzję na podstwie wyniku funkcji score(). Funkcja score przypisuje wynik dla podanych kart. Klasa Card reprezentuję karty(kolor, figura). Klasa game tworzy instancje klas HumanPlayer, ComputerPlayer oraz z każdą rundą instancje klasy Table, wyświetla również niezbedne komunikaty w terminalu. Klasa Table jest najbardziej znaczącym elementem ponieważ to w niej odbywa sie cała licytacja oraz wszytkie fazy gry łącznie z decyzją kto wygrał. Znajduję się tam również funkcja create_deck(), ktora tworzy talię kart złożoną z 52 instancji klasy Card(każda karta jest różna). Talia jest potasowana.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+W pliku database.py znajduję się klasa Database, w której metody pozwalające na pobranie i zwrócenie rankingu(za pomocą funkcji w pliku ranking_io.py) oraz metodę pozwaljącą dodanie nowego wpisu do rankingu i wypisanie go.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+W pliku ranking_io.py zajdują się funkcję umożliwiające zapisy i odczytu pliku.
