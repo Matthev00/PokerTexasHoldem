@@ -225,7 +225,8 @@ class ComputerPlayer(Player):
                 ans = self.raisee(min_bet, phase)
             elif (
                 min_bet > self.chips and
-                points >= 10000
+                points >= 10000 and
+                self.chips > 0
             ):
                 ans = self.all_in()
             else:
@@ -237,7 +238,8 @@ class ComputerPlayer(Player):
                 ans = self.call(min_bet)
             elif (
                 min_bet > self.chips and
-                points >= 10000
+                points >= 10000 and
+                self.chips > 0
             ):
                 ans = self.all_in()
             else:
@@ -486,18 +488,26 @@ class Table:
         else:
             return False
 
+    def equal_bet(self):
+        for i in range(0, len(self._players)):
+            if self._folded[i] is False:
+                if self._bets[i] != self._max_bet:
+                    return False
+        return True
+
     def bidding(self, phase):
         """
         Bidding
         For each player sets calls on True if player folded, or False if not.
-        Untill method everyone_calles returns True betting continues.
+        Untill method equal_bet() returns True or it is first bidding in the
+        turn betting continues.
         If potential end returns True:
         - print Winner and gives him pot
         - breaks the game
         If it is first phase starts bidding from player next to Big Blind.
         In another case starts from small blind.
         Enable for each player to make decision:
-        - if it is a computer calls out player.make_smart_decison mathod
+        - if it is a computer calls out player.make_smart_decison method
         - if it is human calls out player.play method
         - this methods returns info what players did
             - 1 player folded
@@ -518,8 +528,8 @@ class Table:
                 self._calls[player.id] = True
             else:
                 self._calls[player.id] = False
-        bets = 2
-        while bets > 1:
+        first = True
+        while first or self.equal_bet() is False:
             if self.potential_end() is True:
                 for index in range(0, len(self._players)):
                     if self._folded[index] is False:
@@ -542,13 +552,14 @@ class Table:
                     self._calls[player.id] = False
             i = start
             k = 0
-            bets = 0
             while k < len(self._players):
-                if self.potential_end():
-                    i = (i + 1) % len(self._players)
-                    k += 1
+                if self.potential_end() or (self.equal_bet() and not first):
                     break
-                if self._folded[i] is False:
+                if (
+                    self._folded[i] is False and
+                    self._all_in[i] is False and
+                    self._calls[i] is False
+                ):
                     to_bet = self._max_bet - self._bets[i]
                     if self._players[i].id != 0:
                         called = self.everyone_called()
@@ -575,13 +586,14 @@ class Table:
                         print(f'{self._players[i].name} raised {data[1]}')
                         self._bets[i] += data[1]
                         self._pot += data[1]
-                        bets += 1
+                        # bets += 1
                     elif data[0] == 4:
                         print(f'{self._players[i].name} went all in {data[1]}')
                         self._bets[i] += data[1]
                         self._all_in[i] = True
                         self._calls[i] = True
                         self._pot += data[1]
+                        # bets += 1
                     self._max_bet = max(self._max_bet, self._bets[i])
                     if self._players[i].id == 0:
                         print(25*'+')
@@ -591,6 +603,7 @@ class Table:
                     i = (i + 1) % len(self._players)
                     k += 1
                     continue
+            first = False
             if self.potential_end() is True:
                 for index in range(0, len(self._players)):
                     if self._folded[index] is False:
@@ -799,7 +812,10 @@ class Game:
         Creates Human Player and num_of_players Computer Players.
         Adds them to list of players.
         """
-        self._player = HumanPlayer(player_name)
+        if player_name:
+            self._player = HumanPlayer(player_name)
+        else:
+            self._player = HumanPlayer()
         self._players.append(self._player)
         for i in range(1, self._num_of_players+1):
             computer = ComputerPlayer(i)
