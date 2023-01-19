@@ -1,9 +1,9 @@
 place,name,score
-1,Adi,21900
-2,Mateusz,20000
-3,Ari,14000
-4,Stefan,12650
-5,Mariusz,10150
-5,Mariola,10150
-7,Jurek,8750
-8,Khabib,6900
+1,JurekOgórek,30550
+2,KarolinaMalina,26750
+3,Stefan,25200
+3,Marzena,25200
+5,Kevin H,15100
+6,Player,13500
+7,Mateusz,10000
+8,9090900,9950
